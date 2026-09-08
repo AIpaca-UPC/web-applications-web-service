@@ -1,0 +1,17 @@
+bin/
+obj/
+.vs/
+.vscode/
+.idea/
+TestResults/
+coverage/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+appsettings.Development.json
+appsettings.Local.json
+.env
+.DS_Store
+Thumbs.db
+*.log
