@@ -1,0 +1,13 @@
+# Build
+bin/
+obj/
+
+# IDE
+.idea/
+.vs/
+*.user
+*.suo
+*.DS_Store
+
+# Secretos locales
+appsettings.Local.json
