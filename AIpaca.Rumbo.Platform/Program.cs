@@ -14,6 +14,13 @@ using Microsoft.Extensions.Localization;
 using Scalar.AspNetCore;
 using ProblemDetailsFactory = AIpaca.Rumbo.Platform.Shared.Interfaces.Rest.ProblemDetails.ProblemDetailsFactory;
 
+using AIpaca.Rumbo.Platform.VehicleCredentialManagement.Application.CommandServices;
+using AIpaca.Rumbo.Platform.VehicleCredentialManagement.Application.Internal.CommandServices;
+using AIpaca.Rumbo.Platform.VehicleCredentialManagement.Application.Internal.QueryServices;
+using AIpaca.Rumbo.Platform.VehicleCredentialManagement.Application.QueryServices;
+using AIpaca.Rumbo.Platform.VehicleCredentialManagement.Domain.Repositories;
+using AIpaca.Rumbo.Platform.VehicleCredentialManagement.Infrastructure.Persistence.EntityFrameworkCore.Configuration.Repositories;
+
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddRouting(options => options.LowercaseUrls = true);
@@ -61,6 +68,9 @@ builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 builder.Services.AddScoped<DispatchDomainEventsInterceptor>();
 
 // Vehicle & Credential Management Bounded Context
+builder.Services.AddScoped<IVehicleRepository, VehicleRepository>();
+builder.Services.AddScoped<IVehicleCommandService, VehicleCommandService>();
+builder.Services.AddScoped<IVehicleQueryService, VehicleQueryService>();
 
 // Profiles & Relationship Management Bounded Context
 
