@@ -15,4 +15,16 @@
     <data name="ExternalServiceError" xml:space="preserve">
     <value>An external service could not be reached.</value>
   </data>
+  <data name="VehicleNotFound" xml:space="preserve">
+    <value>The specified vehicle was not found.</value>
+  </data>
+  <data name="LicensePlateAlreadyRegistered" xml:space="preserve">
+    <value>A vehicle with this license plate is already registered.</value>
+  </data>
+  <data name="InvalidVehicleData" xml:space="preserve">
+    <value>The vehicle data provided is invalid.</value>
+  </data>
+  <data name="CredentialNotDeclared" xml:space="preserve">
+    <value>No credential of that kind was declared for this vehicle.</value>
+  </data>
 </root>

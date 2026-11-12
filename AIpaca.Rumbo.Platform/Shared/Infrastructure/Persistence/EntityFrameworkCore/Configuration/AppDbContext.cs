@@ -1,5 +1,6 @@
 using AIpaca.Rumbo.Platform.Shared.Infrastructure.Persistence.EntityFrameworkCore.Configuration.Extensions;
 using AIpaca.Rumbo.Platform.Shared.Infrastructure.Persistence.EntityFrameworkCore.Interceptors;
+using AIpaca.Rumbo.Platform.VehicleCredentialManagement.Infrastructure.Persistence.EntityFrameworkCore.Configuration.Extensions;
 using Microsoft.EntityFrameworkCore;
 
 namespace AIpaca.Rumbo.Platform.Shared.Infrastructure.Persistence.EntityFrameworkCore.Configuration;
@@ -36,7 +37,7 @@ public class AppDbContext(DbContextOptions options) : DbContext(options)
         base.OnModelCreating(builder);
 
         // Vehicle & Credential Management Context
-        // builder.ApplyVehicleCredentialManagementConfiguration();
+        builder.ApplyVehicleCredentialManagementConfiguration();
 
         // Profiles & Relationship Management Context
         // builder.ApplyProfilesRelationshipManagementConfiguration();
