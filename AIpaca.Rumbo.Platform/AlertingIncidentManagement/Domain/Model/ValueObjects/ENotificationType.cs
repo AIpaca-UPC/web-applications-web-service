@@ -5,7 +5,7 @@ namespace AIpaca.Rumbo.Platform.AlertingIncidentManagement.Domain.Model.ValueObj
 /// </summary>
 public enum ENotificationType
 {
-    Info,
+    Information,
     Success,
     Important,
     Warning
