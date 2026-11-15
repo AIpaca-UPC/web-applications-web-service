@@ -192,16 +192,25 @@ public class SubscriptionsController(
             result.Message);
     }
 
+   
     /// <summary>
-    ///     Updates the status of an existing subscription.
-    ///     Plan changes are handled separately.
+    ///     Updates a subscription status or changes its plan.
+    ///     Plan changes preserve the previous subscription history.
     /// </summary>
-    /// <param name="subscriptionId">The subscription identifier.</param>
-    /// <param name="resource">The update resource.</param>
-    /// <param name="cancellationToken">The cancellation token.</param>
-    /// <returns>The updated subscription.</returns>
+    /// <param name="subscriptionId">
+    ///     The current subscription identifier.
+    /// </param>
+    /// <param name="resource">
+    ///     The subscription update resource.
+    /// </param>
+    /// <param name="cancellationToken">
+    ///     The cancellation token.
+    /// </param>
+    /// <returns>
+    ///     The updated subscription or the replacement subscription.
+    /// </returns>
     [HttpPut("{subscriptionId:int}")]
-    [EndpointSummary("Update subscription status")]
+    [EndpointSummary("Update subscription status or change plan")]
     [ProducesResponseType(
         typeof(SubscriptionResource),
         StatusCodes.Status200OK)]
@@ -222,6 +231,7 @@ public class SubscriptionsController(
                 "Subscription ID must be positive.");
         }
 
+        // Retrieve the existing subscription.
         var existing = await queryService.Handle(
             new GetSubscriptionByIdQuery(subscriptionId),
             cancellationToken);
@@ -236,20 +246,71 @@ public class SubscriptionsController(
                 "The requested subscription was not found.");
         }
 
+        // When the plan differs, execute the change plan command.
         if (existing.PlanId.Value != resource.PlanId)
         {
+            var changePlanCommand =
+                ChangeSubscriptionPlanCommandFromResourceAssembler
+                    .ToCommandFromResource(subscriptionId, resource);
+
+            if (changePlanCommand is null)
+            {
+                return problemDetailsFactory.CreateProblemDetails(
+                    this,
+                    StatusCodes.Status400BadRequest,
+                    SubscriptionsError.InvalidSubscriptionData,
+                    "Status must be ACTIVE or PAUSED.");
+            }
+
+            var changePlanResult = await commandService.Handle(
+                changePlanCommand,
+                cancellationToken);
+
+            if (changePlanResult.IsSuccess)
+            {
+                return Ok(
+                    SubscriptionResourceFromEntityAssembler
+                        .ToResourceFromEntity(
+                            changePlanResult.Value!,
+                            TodayInLima()));
+            }
+
+            var changePlanStatusCode = changePlanResult.Error switch
+            {
+                SubscriptionsError.SubscriptionNotFound =>
+                    StatusCodes.Status404NotFound,
+
+                SubscriptionsError.PlanNotFound =>
+                    StatusCodes.Status404NotFound,
+
+                SubscriptionsError.PlanUnavailable =>
+                    StatusCodes.Status409Conflict,
+
+                SubscriptionsError.SubscriptionAlreadyExists =>
+                    StatusCodes.Status409Conflict,
+
+                SubscriptionsError.SubscriptionStatusConflict =>
+                    StatusCodes.Status409Conflict,
+
+                SubscriptionsError.InvalidSubscriptionData =>
+                    StatusCodes.Status400BadRequest,
+
+                _ => StatusCodes.Status500InternalServerError
+            };
+
             return problemDetailsFactory.CreateProblemDetails(
                 this,
-                StatusCodes.Status409Conflict,
-                SubscriptionsError.SubscriptionStatusConflict,
-                "Changing subscription plans is not available yet.");
+                changePlanStatusCode,
+                changePlanResult.Error,
+                changePlanResult.Message);
         }
 
-        var command =
+        // When the plan is unchanged, update only the status.
+        var statusCommand =
             ChangeSubscriptionStatusCommandFromResourceAssembler
                 .ToCommandFromResource(subscriptionId, resource);
 
-        if (command is null)
+        if (statusCommand is null)
         {
             return problemDetailsFactory.CreateProblemDetails(
                 this,
@@ -259,14 +320,16 @@ public class SubscriptionsController(
         }
 
         var result = await commandService.Handle(
-            command,
+            statusCommand,
             cancellationToken);
 
         if (result.IsSuccess)
         {
             return Ok(
                 SubscriptionResourceFromEntityAssembler
-                    .ToResourceFromEntity(result.Value!, TodayInLima()));
+                    .ToResourceFromEntity(
+                        result.Value!,
+                        TodayInLima()));
         }
 
         var statusCode = result.Error switch
@@ -289,6 +352,7 @@ public class SubscriptionsController(
             result.Error,
             result.Message);
     }
+
 
     /// <summary>
     ///     Cancels a subscription without deleting

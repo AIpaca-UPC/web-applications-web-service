@@ -52,5 +52,19 @@ public interface ISubscriptionCommandService
     Task<Result<Subscription>> Handle(
         CancelSubscriptionCommand command,
         CancellationToken cancellationToken = default);
+    
+    /// <summary>
+    ///     Changes the subscription plan while preserving
+    ///     the previously selected plan in subscription history.
+    /// </summary>
+    /// <param name="command">The change plan command.</param>
+    /// <param name="cancellationToken">The cancellation token.</param>
+    /// <returns>
+    ///     The result containing the replacement subscription.
+    /// </returns>
+    Task<Result<Subscription>> Handle(
+        ChangeSubscriptionPlanCommand command,
+        CancellationToken cancellationToken = default);
+
 
 }
