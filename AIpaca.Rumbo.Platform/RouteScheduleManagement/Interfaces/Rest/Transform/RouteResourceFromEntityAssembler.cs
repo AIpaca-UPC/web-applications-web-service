@@ -11,12 +11,16 @@ namespace AIpaca.Rumbo.Platform.RouteScheduleManagement.Interfaces.Rest.Transfor
 public static class RouteResourceFromEntityAssembler
 {
     /// <summary>
-    /// Converts a route entity into its public API representation.
+    /// Converts a route aggregate into its REST representation,
+    /// including ordered stops and student assignments.
     /// </summary>
+    /// <param name="entity">Route aggregate to transform.</param>
+    /// <returns>Resource exposed by the API.</returns>
     public static RouteResource ToResourceFromEntity(Route entity)
     {
         ArgumentNullException.ThrowIfNull(entity);
 
+        // Stops are presented in the order configured by the driver.
         var stops = entity.Stops
             .OrderBy(stop => stop.Position)
             .Select(stop =>
@@ -32,14 +36,18 @@ public static class RouteResourceFromEntityAssembler
             })
             .ToList();
 
+        // The frontend expects Monday, Tuesday, etc.
+        // Keep the days ordered from Monday to Sunday.
         var schedule = entity.Schedule
+            .OrderBy(item => ((int)item.DayOfWeek + 6) % 7)
             .Select(item => new RouteScheduleResource(
-                item.DayOfWeek.ToString().ToUpperInvariant(),
+                item.DayOfWeek.ToString(),
                 item.DepartureTime.ToString(
                     "HH:mm:ss",
                     CultureInfo.InvariantCulture)))
             .ToList();
 
+        // Convert domain values to the API contract.
         return new RouteResource(
             entity.Id.Value,
             entity.Code,
