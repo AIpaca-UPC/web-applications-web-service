@@ -1,3 +1,12 @@
+using System.Text.Json;
+using System.Text.Json.Serialization;
+using AIpaca.Rumbo.Platform.Profiles.Application.CommandServices;
+using AIpaca.Rumbo.Platform.Profiles.Application.Internal.CommandServices;
+using AIpaca.Rumbo.Platform.Profiles.Application.Internal.QueryServices;
+using AIpaca.Rumbo.Platform.Profiles.Application.QueryServices;
+using AIpaca.Rumbo.Platform.Profiles.Domain.Repositories;
+using AIpaca.Rumbo.Platform.Profiles.Infrastructure.Persistence.EntityFrameworkCore.Configuration;
+using AIpaca.Rumbo.Platform.Profiles.Infrastructure.Persistence.EntityFrameworkCore.Repositories;
 using AIpaca.Rumbo.Platform.Resources.Errors;
 using AIpaca.Rumbo.Platform.Resources.Shared;
 using AIpaca.Rumbo.Platform.Shared.Domain.Repositories;
@@ -18,7 +27,9 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddRouting(options => options.LowercaseUrls = true);
 builder.Services.AddControllers(options => options.Conventions.Add(new KebabCaseRouteNamingConvention()))
-    .AddDataAnnotationsLocalization();
+    .AddDataAnnotationsLocalization()
+    .AddJsonOptions(options => options.JsonSerializerOptions.Converters.Add(
+        new JsonStringEnumConverter(JsonNamingPolicy.SnakeCaseUpper, allowIntegerValues: false)));
 
 builder.Services.AddProblemDetails();
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
@@ -32,7 +43,7 @@ builder.Services.AddCors(options =>
             .AllowAnyHeader());
 });
 
-builder.Services.AddDbContext<AppDbContext>((serviceProvider, options) =>
+builder.Services.AddDbContext<AppDbContext, ProfilesDbContext>((serviceProvider, options) =>
 {
     var connectionStringTemplate = builder.Configuration.GetConnectionString("DefaultConnection");
     if (string.IsNullOrWhiteSpace(connectionStringTemplate))
@@ -63,6 +74,15 @@ builder.Services.AddScoped<DispatchDomainEventsInterceptor>();
 // Vehicle & Credential Management Bounded Context
 
 // Profiles & Relationship Management Bounded Context
+builder.Services.AddScoped<IProfileRepository, ProfileRepository>();
+builder.Services.AddScoped<IProfileQueryService, ProfileQueryService>();
+builder.Services.AddScoped<IProfileCommandService, ProfileCommandService>();
+builder.Services.AddScoped<IStudentRepository, StudentRepository>();
+builder.Services.AddScoped<IStudentQueryService, StudentQueryService>();
+builder.Services.AddScoped<IStudentCommandService, StudentCommandService>();
+builder.Services.AddScoped<IDataDeletionRequestRepository, DataDeletionRequestRepository>();
+builder.Services.AddScoped<IDataDeletionRequestQueryService, DataDeletionRequestQueryService>();
+builder.Services.AddScoped<IDataDeletionRequestCommandService, DataDeletionRequestCommandService>();
 
 // Route & Schedule Management Bounded Context
 
