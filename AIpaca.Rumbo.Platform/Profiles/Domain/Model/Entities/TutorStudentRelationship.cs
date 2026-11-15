@@ -6,6 +6,8 @@ namespace AIpaca.Rumbo.Platform.Profiles.Domain.Model.Entities;
 
 public class TutorStudentRelationship
 {
+    private TutorStudentRelationship() {}
+    
     internal TutorStudentRelationship(AuthorizeTutorStudentRelationshipCommand command)
     {
         TutorProfileId = command.TutorProfileId;
