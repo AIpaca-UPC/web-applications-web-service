@@ -1,9 +1,6 @@
-using AIpaca.Rumbo.Platform.AlertingIncidentManagement.Application.CommandServices;
-using AIpaca.Rumbo.Platform.AlertingIncidentManagement.Application.Internal.CommandServices;
-using AIpaca.Rumbo.Platform.AlertingIncidentManagement.Application.Internal.QueryServices;
-using AIpaca.Rumbo.Platform.AlertingIncidentManagement.Application.QueryServices;
-using AIpaca.Rumbo.Platform.AlertingIncidentManagement.Domain.Repositories;
-using AIpaca.Rumbo.Platform.AlertingIncidentManagement.Infrastructure.Persistence.EntityFrameworkCore.Repositories;
+using System.Text.Json;
+using System.Text.Json.Serialization;
+
 using AIpaca.Rumbo.Platform.Resources.Errors;
 using AIpaca.Rumbo.Platform.Resources.Shared;
 using AIpaca.Rumbo.Platform.Shared.Domain.Repositories;
@@ -27,11 +24,44 @@ using AIpaca.Rumbo.Platform.VehicleCredentialManagement.Application.QueryService
 using AIpaca.Rumbo.Platform.VehicleCredentialManagement.Domain.Repositories;
 using AIpaca.Rumbo.Platform.VehicleCredentialManagement.Infrastructure.Persistence.EntityFrameworkCore.Configuration.Repositories;
 
+using AIpaca.Rumbo.Platform.Profiles.Application.CommandServices;
+using AIpaca.Rumbo.Platform.Profiles.Application.Internal.CommandServices;
+using AIpaca.Rumbo.Platform.Profiles.Application.Internal.QueryServices;
+using AIpaca.Rumbo.Platform.Profiles.Application.QueryServices;
+using AIpaca.Rumbo.Platform.Profiles.Domain.Repositories;
+using AIpaca.Rumbo.Platform.Profiles.Infrastructure.Persistence.EntityFrameworkCore.Repositories;
+
+using AIpaca.Rumbo.Platform.RouteScheduleManagement.Application.CommandServices;
+using AIpaca.Rumbo.Platform.RouteScheduleManagement.Application.Internal.CommandServices;
+using AIpaca.Rumbo.Platform.RouteScheduleManagement.Application.Internal.QueryServices;
+using AIpaca.Rumbo.Platform.RouteScheduleManagement.Application.QueryServices;
+using AIpaca.Rumbo.Platform.RouteScheduleManagement.Domain.Repositories;
+using AIpaca.Rumbo.Platform.RouteScheduleManagement.Infrastructure.Persistence.EntityFrameworkCore.Repositories;
+
+using AIpaca.Rumbo.Platform.AlertingIncidentManagement.Application.CommandServices;
+using AIpaca.Rumbo.Platform.AlertingIncidentManagement.Application.Internal.CommandServices;
+using AIpaca.Rumbo.Platform.AlertingIncidentManagement.Application.Internal.QueryServices;
+using AIpaca.Rumbo.Platform.AlertingIncidentManagement.Application.QueryServices;
+using AIpaca.Rumbo.Platform.AlertingIncidentManagement.Domain.Repositories;
+using AIpaca.Rumbo.Platform.AlertingIncidentManagement.Infrastructure.Persistence.EntityFrameworkCore.Repositories;
+
+using AIpaca.Rumbo.Platform.SubscriptionBilling.Application.CommandServices;
+using AIpaca.Rumbo.Platform.SubscriptionBilling.Application.Internal.CommandServices;
+using AIpaca.Rumbo.Platform.SubscriptionBilling.Application.Internal.QueryServices;
+using AIpaca.Rumbo.Platform.SubscriptionBilling.Application.QueryServices;
+using AIpaca.Rumbo.Platform.SubscriptionBilling.Domain.Repositories;
+using AIpaca.Rumbo.Platform.SubscriptionBilling.Infrastructure.Persistence.EntityFrameworkCore.Repositories;
+
 var builder = WebApplication.CreateBuilder(args);
+var port = Environment.GetEnvironmentVariable("PORT");
+if (!string.IsNullOrWhiteSpace(port))
+    builder.WebHost.UseUrls($"http://0.0.0.0:{port}");
 
 builder.Services.AddRouting(options => options.LowercaseUrls = true);
 builder.Services.AddControllers(options => options.Conventions.Add(new KebabCaseRouteNamingConvention()))
-    .AddDataAnnotationsLocalization();
+    .AddDataAnnotationsLocalization()
+    .AddJsonOptions(options => options.JsonSerializerOptions.Converters.Add(
+        new JsonStringEnumConverter(JsonNamingPolicy.SnakeCaseUpper, allowIntegerValues: false)));
 
 builder.Services.AddProblemDetails();
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
@@ -79,8 +109,20 @@ builder.Services.AddScoped<IVehicleCommandService, VehicleCommandService>();
 builder.Services.AddScoped<IVehicleQueryService, VehicleQueryService>();
 
 // Profiles & Relationship Management Bounded Context
+builder.Services.AddScoped<IProfileRepository, ProfileRepository>();
+builder.Services.AddScoped<IProfileQueryService, ProfileQueryService>();
+builder.Services.AddScoped<IProfileCommandService, ProfileCommandService>();
+builder.Services.AddScoped<IStudentRepository, StudentRepository>();
+builder.Services.AddScoped<IStudentQueryService, StudentQueryService>();
+builder.Services.AddScoped<IStudentCommandService, StudentCommandService>();
+builder.Services.AddScoped<IDataDeletionRequestRepository, DataDeletionRequestRepository>();
+builder.Services.AddScoped<IDataDeletionRequestQueryService, DataDeletionRequestQueryService>();
+builder.Services.AddScoped<IDataDeletionRequestCommandService, DataDeletionRequestCommandService>();
 
 // Route & Schedule Management Bounded Context
+builder.Services.AddScoped<IRouteRepository, RouteRepository>();
+builder.Services.AddScoped<IRouteCommandService, RouteCommandService>();
+builder.Services.AddScoped<IRouteQueryService, RouteQueryService>();
 
 // Trip Execution & Monitoring Bounded Context
 
@@ -90,6 +132,12 @@ builder.Services.AddScoped<INotificationCommandService, NotificationCommandServi
 builder.Services.AddScoped<INotificationQueryService, NotificationQueryService>();
 
 // Subscription & Billing Bounded Context
+builder.Services.AddScoped<IPlanRepository, PlanRepository>();
+builder.Services.AddScoped<ISubscriptionRepository, SubscriptionRepository>();
+builder.Services.AddScoped<IPlanCommandService, PlanCommandService>();
+builder.Services.AddScoped<ISubscriptionCommandService, SubscriptionCommandService>();
+builder.Services.AddScoped<IPlanQueryService, PlanQueryService>();
+builder.Services.AddScoped<ISubscriptionQueryService, SubscriptionQueryService>();
 
 // Identity & Access Management Bounded Context
 
@@ -115,14 +163,16 @@ app.UseRequestLocalization(new RequestLocalizationOptions()
     .AddSupportedCultures(supportedCultures)
     .AddSupportedUICultures(supportedCultures));
 
-if (app.Environment.IsDevelopment())
-{
-    app.MapOpenApi();
-    app.MapScalarApiReference();
-}
+
+app.MapOpenApi();
+app.MapScalarApiReference();
+
 
 app.UseCors("AllowAllPolicy");
-app.UseHttpsRedirection();
+
+if(app.Environment.IsDevelopment())
+    app.UseHttpsRedirection();
+
 app.UseAuthorization();
 app.MapControllers();
 
