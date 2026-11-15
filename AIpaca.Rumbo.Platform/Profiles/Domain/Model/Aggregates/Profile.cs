@@ -1,5 +1,4 @@
 using AIpaca.Rumbo.Platform.Profiles.Domain.Model.Commands;
-using AIpaca.Rumbo.Platform.Profiles.Domain.Model.Events;
 using AIpaca.Rumbo.Platform.Profiles.Domain.Model.ValueObjects;
 using AIpaca.Rumbo.Platform.Shared.Domain.Model.Aggregates.Internal;
 
@@ -19,8 +18,6 @@ public partial class Profile : AggregateRoot
         Name = new PersonName(firstName, lastName);
         PhoneNumber = new PhoneNumber(phoneNumber);
         ProfileType = profileType;
-        
-        AddDomainEvent(new ProfileCreatedEvent(Id));
     }
     
     public Profile(CreateProfileCommand command)
@@ -29,8 +26,6 @@ public partial class Profile : AggregateRoot
         Name = new PersonName(command.FirstName, command.LastName);
         PhoneNumber = new PhoneNumber(command.PhoneNumber);
         ProfileType = command.ProfileType;
-        
-        AddDomainEvent(new ProfileCreatedEvent(Id));
     }
 
     public ProfileId Id { get; private set; }
