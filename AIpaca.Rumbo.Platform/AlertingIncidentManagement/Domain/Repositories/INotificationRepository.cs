@@ -6,8 +6,7 @@ namespace AIpaca.Rumbo.Platform.AlertingIncidentManagement.Domain.Repositories;
 
 public interface INotificationRepository : IBaseRepository<Notification>
 {
-    Task<Notification> FindByProfileIdAsync(ProfileId profileId, CancellationToken cancellationToken = default);
-    
-    Task<Notification> FindByStudentIdAsync(StudentId studentId, CancellationToken cancellationToken = default);
-    
+    Task<IEnumerable<Notification>> FindByProfileIdAsync(ProfileId profileId, CancellationToken cancellationToken = default);
+
+    Task<IEnumerable<Notification>> FindByStudentIdAsync(StudentId studentId, CancellationToken cancellationToken = default);
 }
