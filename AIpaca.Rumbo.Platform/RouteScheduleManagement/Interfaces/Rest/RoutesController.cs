@@ -1,3 +1,4 @@
+using AIpaca.Rumbo.Platform.Shared.Application.Model;
 using AIpaca.Rumbo.Platform.Shared.Interfaces.Rest.ProblemDetails;
 using AIpaca.Rumbo.Platform.RouteScheduleManagement.Application.CommandServices;
 using AIpaca.Rumbo.Platform.RouteScheduleManagement.Application.QueryServices;
@@ -7,11 +8,13 @@ using AIpaca.Rumbo.Platform.RouteScheduleManagement.Domain.Model.Queries;
 using AIpaca.Rumbo.Platform.RouteScheduleManagement.Interfaces.Rest.Resources;
 using AIpaca.Rumbo.Platform.RouteScheduleManagement.Interfaces.Rest.Transform;
 using Microsoft.AspNetCore.Mvc;
+using Route = AIpaca.Rumbo.Platform.RouteScheduleManagement.Domain.Model.Aggregates.Route;
 
 namespace AIpaca.Rumbo.Platform.RouteScheduleManagement.Interfaces.Rest;
 
 /// <summary>
-/// REST API for school route configuration and publication.
+/// REST API for school route configuration,
+/// student assignments and route publication.
 /// </summary>
 [ApiController]
 [Route("api/v1/routes")]
@@ -27,17 +30,22 @@ public class RoutesController(
     /// </summary>
     [HttpGet]
     [EndpointSummary("Get routes")]
-    [ProducesResponseType(typeof(IEnumerable<RouteResource>), StatusCodes.Status200OK)]
+    [ProducesResponseType(
+        typeof(IEnumerable<RouteResource>),
+        StatusCodes.Status200OK)]
     public async Task<IActionResult> GetAllRoutes(
         [FromQuery] int? driverProfileId,
         CancellationToken cancellationToken)
     {
-        if (driverProfileId.HasValue && driverProfileId.Value < 1)
-            return Invalid("Driver profile ID must be positive.");
+        if (driverProfileId.HasValue &&
+            driverProfileId.Value < 1)
+            return Invalid(
+                "Driver profile ID must be positive.");
 
         var routes = driverProfileId.HasValue
             ? await queryService.Handle(
-                new GetAllRoutesByDriverProfileIdQuery(driverProfileId.Value),
+                new GetAllRoutesByDriverProfileIdQuery(
+                    driverProfileId.Value),
                 cancellationToken)
             : await queryService.Handle(
                 new GetAllRoutesQuery(),
@@ -48,11 +56,13 @@ public class RoutesController(
     }
 
     /// <summary>
-    /// Retrieves a route by ID.
+    /// Retrieves a route by its unique identifier.
     /// </summary>
     [HttpGet("{routeId:int}")]
     [EndpointSummary("Get route by ID")]
-    [ProducesResponseType(typeof(RouteResource), StatusCodes.Status200OK)]
+    [ProducesResponseType(
+        typeof(RouteResource),
+        StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> GetRouteById(
         int routeId,
@@ -74,11 +84,13 @@ public class RoutesController(
     }
 
     /// <summary>
-    /// Creates a configurable route.
+    /// Creates a configurable route with stops and schedule.
     /// </summary>
     [HttpPost]
     [EndpointSummary("Create route")]
-    [ProducesResponseType(typeof(RouteResource), StatusCodes.Status201Created)]
+    [ProducesResponseType(
+        typeof(RouteResource),
+        StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> CreateRoute(
         [FromBody] CreateRouteResource resource,
@@ -87,19 +99,23 @@ public class RoutesController(
         try
         {
             var command =
-                CreateRouteCommandFromResourceAssembler.ToCommandFromResource(resource);
+                CreateRouteCommandFromResourceAssembler
+                    .ToCommandFromResource(resource);
 
             var result = await commandService.Handle(
-                command, cancellationToken);
+                command,
+                cancellationToken);
 
-            return RoutesActionsResultAssembler.ToActionResultFromCommandResult(
-                this,
-                result,
-                problemDetailsFactory,
-                created => CreatedAtAction(
-                    nameof(GetRouteById),
-                    new { routeId = created.Id.Value },
-                    RouteResourceFromEntityAssembler.ToResourceFromEntity(created)));
+            return RoutesActionsResultAssembler
+                .ToActionResultFromCommandResult(
+                    this,
+                    result,
+                    problemDetailsFactory,
+                    created => CreatedAtAction(
+                        nameof(GetRouteById),
+                        new { routeId = created.Id.Value },
+                        RouteResourceFromEntityAssembler
+                            .ToResourceFromEntity(created)));
         }
         catch (ArgumentException ex)
         {
@@ -108,10 +124,16 @@ public class RoutesController(
     }
 
     /// <summary>
-    /// Updates route information, stops and schedule.
+    /// Updates route information, stops and weekly schedule.
     /// </summary>
     [HttpPut("{routeId:int}")]
     [EndpointSummary("Update route")]
+    [ProducesResponseType(
+        typeof(RouteResource),
+        StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status409Conflict)]
     public async Task<IActionResult> UpdateRoute(
         int routeId,
         [FromBody] UpdateRouteResource resource,
@@ -120,11 +142,12 @@ public class RoutesController(
         try
         {
             var command =
-                UpdateRouteCommandFromResourceAssembler.ToCommandFromResource(
-                    routeId, resource);
+                UpdateRouteCommandFromResourceAssembler
+                    .ToCommandFromResource(routeId, resource);
 
             var result = await commandService.Handle(
-                command, cancellationToken);
+                command,
+                cancellationToken);
 
             return RouteCommandResponse(result);
         }
@@ -135,10 +158,16 @@ public class RoutesController(
     }
 
     /// <summary>
-    /// Updates a route's weekly schedule.
+    /// Updates only the weekly schedule of a route.
     /// </summary>
     [HttpPut("{routeId:int}/schedule")]
     [EndpointSummary("Update route schedule")]
+    [ProducesResponseType(
+        typeof(RouteResource),
+        StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status409Conflict)]
     public async Task<IActionResult> UpdateRouteSchedule(
         int routeId,
         [FromBody] UpdateRouteScheduleResource resource,
@@ -147,11 +176,12 @@ public class RoutesController(
         try
         {
             var command =
-                RouteActionCommandFromResourceAssembler.ToUpdateScheduleCommand(
-                    routeId, resource);
+                RouteActionCommandFromResourceAssembler
+                    .ToUpdateScheduleCommand(routeId, resource);
 
             var result = await commandService.Handle(
-                command, cancellationToken);
+                command,
+                cancellationToken);
 
             return RouteCommandResponse(result);
         }
@@ -166,6 +196,12 @@ public class RoutesController(
     /// </summary>
     [HttpPut("{routeId:int}/stops/{stopId:int}/student")]
     [EndpointSummary("Assign student to stop")]
+    [ProducesResponseType(
+        typeof(RouteResource),
+        StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status409Conflict)]
     public async Task<IActionResult> AssignStudent(
         int routeId,
         int stopId,
@@ -173,20 +209,58 @@ public class RoutesController(
         CancellationToken cancellationToken)
     {
         var command =
-            RouteActionCommandFromResourceAssembler.ToAssignStudentCommand(
-                routeId, stopId, resource);
+            RouteActionCommandFromResourceAssembler
+                .ToAssignStudentCommand(
+                    routeId,
+                    stopId,
+                    resource);
 
         var result = await commandService.Handle(
-            command, cancellationToken);
+            command,
+            cancellationToken);
 
         return RouteCommandResponse(result);
     }
 
     /// <summary>
-    /// Replaces all student assignments of a route.
+    /// Removes a student assignment without deleting the stop.
+    /// </summary>
+    [HttpDelete("{routeId:int}/stops/{stopId:int}/student")]
+    [EndpointSummary("Unassign student from route stop")]
+    [EndpointDescription(
+        "Removes the student assignment without deleting the stop.")]
+    [ProducesResponseType(
+        typeof(RouteResource),
+        StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status409Conflict)]
+    public async Task<IActionResult> UnassignStudent(
+        int routeId,
+        int stopId,
+        CancellationToken cancellationToken)
+    {
+        var command = new UnassignStudentFromRouteCommand(
+            routeId,
+            stopId);
+
+        var result = await commandService.Handle(
+            command,
+            cancellationToken);
+
+        return RouteCommandResponse(result);
+    }
+
+    /// <summary>
+    /// Replaces every student-to-stop assignment of a route.
     /// </summary>
     [HttpPut("{routeId:int}/assignments")]
     [EndpointSummary("Replace route assignments")]
+    [ProducesResponseType(
+        typeof(RouteResource),
+        StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status409Conflict)]
     public async Task<IActionResult> ReplaceAssignments(
         int routeId,
         [FromBody] ReplaceRouteAssignmentsResource resource,
@@ -195,11 +269,14 @@ public class RoutesController(
         try
         {
             var command =
-                RouteActionCommandFromResourceAssembler.ToReplaceAssignmentsCommand(
-                    routeId, resource);
+                RouteActionCommandFromResourceAssembler
+                    .ToReplaceAssignmentsCommand(
+                        routeId,
+                        resource);
 
             var result = await commandService.Handle(
-                command, cancellationToken);
+                command,
+                cancellationToken);
 
             return RouteCommandResponse(result);
         }
@@ -210,10 +287,16 @@ public class RoutesController(
     }
 
     /// <summary>
-    /// Publishes a route when its configuration is complete.
+    /// Publishes a route when all requirements are satisfied.
     /// </summary>
     [HttpPost("{routeId:int}/publish")]
     [EndpointSummary("Publish route")]
+    [ProducesResponseType(
+        typeof(RouteResource),
+        StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status409Conflict)]
     public async Task<IActionResult> PublishRoute(
         int routeId,
         CancellationToken cancellationToken)
@@ -226,10 +309,13 @@ public class RoutesController(
     }
 
     /// <summary>
-    /// Deletes an existing route.
+    /// Deletes a configurable route.
     /// </summary>
     [HttpDelete("{routeId:int}")]
     [EndpointSummary("Delete route")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status409Conflict)]
     public async Task<IActionResult> DeleteRoute(
         int routeId,
         CancellationToken cancellationToken)
@@ -238,30 +324,32 @@ public class RoutesController(
             new DeleteRouteCommand(routeId),
             cancellationToken);
 
-        return RoutesActionsResultAssembler.ToActionResultFromCommandResult(
-            this,
-            result,
-            problemDetailsFactory,
-            _ => NoContent());
+        return RoutesActionsResultAssembler
+            .ToActionResultFromCommandResult(
+                this,
+                result,
+                problemDetailsFactory,
+                _ => NoContent());
     }
 
     /// <summary>
     /// Converts route command results into HTTP responses.
     /// </summary>
     private IActionResult RouteCommandResponse(
-        AIpaca.Rumbo.Platform.Shared.Application.Model.Result<
-            AIpaca.Rumbo.Platform.RouteScheduleManagement.Domain.Model.Aggregates.Route> result)
+        Result<Route> result)
     {
-        return RoutesActionsResultAssembler.ToActionResultFromCommandResult(
-            this,
-            result,
-            problemDetailsFactory,
-            route => Ok(
-                RouteResourceFromEntityAssembler.ToResourceFromEntity(route)));
+        return RoutesActionsResultAssembler
+            .ToActionResultFromCommandResult(
+                this,
+                result,
+                problemDetailsFactory,
+                route => Ok(
+                    RouteResourceFromEntityAssembler
+                        .ToResourceFromEntity(route)));
     }
 
     /// <summary>
-    /// Returns a standardized HTTP 400 response.
+    /// Returns an HTTP 400 response for invalid input.
     /// </summary>
     private IActionResult Invalid(string message)
     {

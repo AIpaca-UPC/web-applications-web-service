@@ -5,28 +5,64 @@ using Route = AIpaca.Rumbo.Platform.RouteScheduleManagement.Domain.Model.Aggrega
 namespace AIpaca.Rumbo.Platform.RouteScheduleManagement.Application.CommandServices;
 
 /// <summary>
-/// Defines command operations for the Route Schedule Management context.
+/// Defines command operations for the
+/// Route Schedule Management bounded context.
 /// </summary>
 public interface IRouteCommandService
 {
+    /// <summary>
+    /// Creates a new configurable route.
+    /// </summary>
     Task<Result<Route>> Handle(
-        CreateRouteCommand command, CancellationToken cancellationToken);
+        CreateRouteCommand command,
+        CancellationToken cancellationToken);
 
+    /// <summary>
+    /// Updates an existing route.
+    /// </summary>
     Task<Result<Route>> Handle(
-        UpdateRouteCommand command, CancellationToken cancellationToken);
+        UpdateRouteCommand command,
+        CancellationToken cancellationToken);
 
+    /// <summary>
+    /// Updates the weekly schedule of a route.
+    /// </summary>
     Task<Result<Route>> Handle(
-        UpdateRouteScheduleCommand command, CancellationToken cancellationToken);
+        UpdateRouteScheduleCommand command,
+        CancellationToken cancellationToken);
 
+    /// <summary>
+    /// Assigns a student to a route stop.
+    /// </summary>
     Task<Result<Route>> Handle(
-        AssignStudentToRouteCommand command, CancellationToken cancellationToken);
+        AssignStudentToRouteCommand command,
+        CancellationToken cancellationToken);
 
+    /// <summary>
+    /// Removes a student assignment from a route stop.
+    /// </summary>
     Task<Result<Route>> Handle(
-        ReplaceRouteAssignmentsCommand command, CancellationToken cancellationToken);
+        UnassignStudentFromRouteCommand command,
+        CancellationToken cancellationToken);
 
+    /// <summary>
+    /// Replaces all student assignments of a route.
+    /// </summary>
     Task<Result<Route>> Handle(
-        PublishRouteCommand command, CancellationToken cancellationToken);
+        ReplaceRouteAssignmentsCommand command,
+        CancellationToken cancellationToken);
 
+    /// <summary>
+    /// Publishes a completed route.
+    /// </summary>
+    Task<Result<Route>> Handle(
+        PublishRouteCommand command,
+        CancellationToken cancellationToken);
+
+    /// <summary>
+    /// Deletes a configurable route.
+    /// </summary>
     Task<Result<int>> Handle(
-        DeleteRouteCommand command, CancellationToken cancellationToken);
+        DeleteRouteCommand command,
+        CancellationToken cancellationToken);
 }
