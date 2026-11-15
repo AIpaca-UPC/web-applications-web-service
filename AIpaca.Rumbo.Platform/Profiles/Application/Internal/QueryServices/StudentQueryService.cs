@@ -10,6 +10,11 @@ namespace AIpaca.Rumbo.Platform.Profiles.Application.Internal.QueryServices;
 /// <param name="studentRepository"></param>
 public class StudentQueryService(IStudentRepository studentRepository) : IStudentQueryService
 {
+    public async Task<IEnumerable<Student>> Handle(GetAllStudentsQuery query, CancellationToken cancellationToken)
+    {
+        return await studentRepository.ListAsNoTrackingAsync(cancellationToken);
+    }
+
     public async Task<Student?> Handle(GetStudentByIdQuery query, CancellationToken cancellationToken)
     {
         return await studentRepository.FindByIdAsNoTrackingAsync(query.StudentId, cancellationToken);
