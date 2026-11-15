@@ -105,20 +105,34 @@ public static class ModelBuilderExtensions
             .HasMaxLength(20)
             .IsRequired();
 
+        // Convert DateOnly to DateTime for the MySQL provider.
+        // Preserve the SQL DATE column type without a time component.
+        var dateOnlyConverter = new ValueConverter<DateOnly, DateTime>(
+            date => date.ToDateTime(TimeOnly.MinValue),
+            dateTime => DateOnly.FromDateTime(dateTime));
+
+        
+        // Subscription start date.
         builder.Entity<Subscription>()
             .Property(subscription => subscription.StartedAt)
+            .HasConversion(dateOnlyConverter)
             .HasColumnType("date")
             .IsRequired();
 
+        // Current billing period start date.
         builder.Entity<Subscription>()
             .Property(subscription => subscription.CurrentPeriodStart)
+            .HasConversion(dateOnlyConverter)
             .HasColumnType("date")
             .IsRequired();
 
+        // Current billing period end date.
         builder.Entity<Subscription>()
             .Property(subscription => subscription.CurrentPeriodEnd)
+            .HasConversion(dateOnlyConverter)
             .HasColumnType("date")
             .IsRequired();
+
 
         builder.Entity<Subscription>()
             .Property(subscription => subscription.VehicleLimit);
