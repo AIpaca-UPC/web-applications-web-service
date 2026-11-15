@@ -5,7 +5,7 @@ using AIpaca.Rumbo.Platform.Shared.Domain.Model.Aggregates.Internal;
 
 namespace AIpaca.Rumbo.Platform.Profiles.Domain.Model.Aggregates;
 
-public class Student : AggregateRoot
+public partial class Student : AggregateRoot
 {
     public Student()
     {
