@@ -20,7 +20,12 @@ public record CreatePlanResource(
     [StringLength(500)]
     string? Description,
 
-    [Range(typeof(decimal), "0", "99999999.99")]
+    [Range(
+        typeof(decimal),
+        "0",
+        "99999999.99",
+        ParseLimitsInInvariantCulture = true,
+        ConvertValueInInvariantCulture = true)]
     decimal ReferencePrice,
 
     [Required]
