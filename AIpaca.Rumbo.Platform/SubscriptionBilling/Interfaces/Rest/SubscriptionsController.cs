@@ -2,8 +2,10 @@
 using AIpaca.Rumbo.Platform.Shared.Interfaces.Rest.ProblemDetails;
 using AIpaca.Rumbo.Platform.SubscriptionBilling.Application.CommandServices;
 using AIpaca.Rumbo.Platform.SubscriptionBilling.Application.QueryServices;
+using AIpaca.Rumbo.Platform.SubscriptionBilling.Domain.Model.Commands;
 using AIpaca.Rumbo.Platform.SubscriptionBilling.Domain.Model.Errors;
 using AIpaca.Rumbo.Platform.SubscriptionBilling.Domain.Model.Queries;
+using AIpaca.Rumbo.Platform.SubscriptionBilling.Domain.Model.ValueObjects;
 using AIpaca.Rumbo.Platform.SubscriptionBilling.Interfaces.Rest.Resources;
 using AIpaca.Rumbo.Platform.SubscriptionBilling.Interfaces.Rest.Transform;
 using Microsoft.AspNetCore.Mvc;
@@ -11,7 +13,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace AIpaca.Rumbo.Platform.SubscriptionBilling.Interfaces.Rest;
 
 /// <summary>
-///     REST controller for driver subscriptions.
+///     REST controller for managing driver subscriptions.
 /// </summary>
 /// <param name="commandService">The subscription command service.</param>
 /// <param name="queryService">The subscription query service.</param>
@@ -26,9 +28,9 @@ public class SubscriptionsController(
     ProblemDetailsFactory problemDetailsFactory) : ControllerBase
 {
     /// <summary>
-    ///     Returns the current date in Peru.
+    ///     Returns the current date in the America/Lima time zone.
     /// </summary>
-    /// <returns>The date in the America/Lima time zone.</returns>
+    /// <returns>The current date in Lima.</returns>
     private static DateOnly TodayInLima()
     {
         var zone = TimeZoneInfo.FindSystemTimeZoneById("America/Lima");
@@ -42,6 +44,9 @@ public class SubscriptionsController(
     ///     Retrieves subscriptions, optionally filtered by driver.
     /// </summary>
     /// <param name="driverProfileId">Optional driver identifier.</param>
+    /// <param name="includeCancelled">
+    ///     Whether cancelled subscriptions should be included.
+    /// </param>
     /// <param name="cancellationToken">The cancellation token.</param>
     /// <returns>The subscription collection.</returns>
     [HttpGet]
@@ -51,10 +56,15 @@ public class SubscriptionsController(
         StatusCodes.Status200OK)]
     public async Task<IActionResult> GetSubscriptions(
         [FromQuery] string? driverProfileId,
+        [FromQuery] bool includeCancelled,
         CancellationToken cancellationToken)
     {
+        var query = new GetAllSubscriptionsQuery(
+            driverProfileId,
+            includeCancelled);
+
         var subscriptions = await queryService.Handle(
-            new GetAllSubscriptionsQuery(driverProfileId),
+            query,
             cancellationToken);
 
         var today = TodayInLima();
@@ -171,6 +181,175 @@ public class SubscriptionsController(
 
             SubscriptionsError.InvalidSubscriptionData =>
                 StatusCodes.Status400BadRequest,
+
+            _ => StatusCodes.Status500InternalServerError
+        };
+
+        return problemDetailsFactory.CreateProblemDetails(
+            this,
+            statusCode,
+            result.Error,
+            result.Message);
+    }
+
+    /// <summary>
+    ///     Updates the status of an existing subscription.
+    ///     Plan changes are handled separately.
+    /// </summary>
+    /// <param name="subscriptionId">The subscription identifier.</param>
+    /// <param name="resource">The update resource.</param>
+    /// <param name="cancellationToken">The cancellation token.</param>
+    /// <returns>The updated subscription.</returns>
+    [HttpPut("{subscriptionId:int}")]
+    [EndpointSummary("Update subscription status")]
+    [ProducesResponseType(
+        typeof(SubscriptionResource),
+        StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status409Conflict)]
+    public async Task<IActionResult> UpdateSubscription(
+        int subscriptionId,
+        [FromBody] UpdateSubscriptionResource resource,
+        CancellationToken cancellationToken)
+    {
+        if (subscriptionId <= 0)
+        {
+            return problemDetailsFactory.CreateProblemDetails(
+                this,
+                StatusCodes.Status400BadRequest,
+                SubscriptionsError.InvalidSubscriptionData,
+                "Subscription ID must be positive.");
+        }
+
+        var existing = await queryService.Handle(
+            new GetSubscriptionByIdQuery(subscriptionId),
+            cancellationToken);
+
+        if (existing is null ||
+            existing.DriverProfileId != resource.DriverProfileId.Trim())
+        {
+            return problemDetailsFactory.CreateProblemDetails(
+                this,
+                StatusCodes.Status404NotFound,
+                SubscriptionsError.SubscriptionNotFound,
+                "The requested subscription was not found.");
+        }
+
+        if (existing.PlanId.Value != resource.PlanId)
+        {
+            return problemDetailsFactory.CreateProblemDetails(
+                this,
+                StatusCodes.Status409Conflict,
+                SubscriptionsError.SubscriptionStatusConflict,
+                "Changing subscription plans is not available yet.");
+        }
+
+        var command =
+            ChangeSubscriptionStatusCommandFromResourceAssembler
+                .ToCommandFromResource(subscriptionId, resource);
+
+        if (command is null)
+        {
+            return problemDetailsFactory.CreateProblemDetails(
+                this,
+                StatusCodes.Status400BadRequest,
+                SubscriptionsError.InvalidSubscriptionData,
+                "Status must be ACTIVE or PAUSED.");
+        }
+
+        var result = await commandService.Handle(
+            command,
+            cancellationToken);
+
+        if (result.IsSuccess)
+        {
+            return Ok(
+                SubscriptionResourceFromEntityAssembler
+                    .ToResourceFromEntity(result.Value!, TodayInLima()));
+        }
+
+        var statusCode = result.Error switch
+        {
+            SubscriptionsError.SubscriptionNotFound =>
+                StatusCodes.Status404NotFound,
+
+            SubscriptionsError.InvalidSubscriptionData =>
+                StatusCodes.Status400BadRequest,
+
+            SubscriptionsError.SubscriptionStatusConflict =>
+                StatusCodes.Status409Conflict,
+
+            _ => StatusCodes.Status500InternalServerError
+        };
+
+        return problemDetailsFactory.CreateProblemDetails(
+            this,
+            statusCode,
+            result.Error,
+            result.Message);
+    }
+
+    /// <summary>
+    ///     Cancels a subscription without deleting
+    ///     its historical information.
+    /// </summary>
+    /// <param name="subscriptionId">The subscription identifier.</param>
+    /// <param name="cancellationToken">The cancellation token.</param>
+    /// <returns>No content when cancellation succeeds.</returns>
+    [HttpDelete("{subscriptionId:int}")]
+    [EndpointSummary("Cancel a subscription")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status409Conflict)]
+    public async Task<IActionResult> CancelSubscription(
+        int subscriptionId,
+        CancellationToken cancellationToken)
+    {
+        if (subscriptionId <= 0)
+        {
+            return problemDetailsFactory.CreateProblemDetails(
+                this,
+                StatusCodes.Status400BadRequest,
+                SubscriptionsError.InvalidSubscriptionData,
+                "Subscription ID must be positive.");
+        }
+
+        var existing = await queryService.Handle(
+            new GetSubscriptionByIdQuery(subscriptionId),
+            cancellationToken);
+
+        if (existing is null)
+        {
+            return problemDetailsFactory.CreateProblemDetails(
+                this,
+                StatusCodes.Status404NotFound,
+                SubscriptionsError.SubscriptionNotFound,
+                "The requested subscription was not found.");
+        }
+
+        var command = new CancelSubscriptionCommand(
+            new SubscriptionId(subscriptionId),
+            existing.DriverProfileId);
+
+        var result = await commandService.Handle(
+            command,
+            cancellationToken);
+
+        if (result.IsSuccess)
+            return NoContent();
+
+        var statusCode = result.Error switch
+        {
+            SubscriptionsError.SubscriptionNotFound =>
+                StatusCodes.Status404NotFound,
+
+            SubscriptionsError.InvalidSubscriptionData =>
+                StatusCodes.Status400BadRequest,
+
+            SubscriptionsError.SubscriptionStatusConflict =>
+                StatusCodes.Status409Conflict,
 
             _ => StatusCodes.Status500InternalServerError
         };
