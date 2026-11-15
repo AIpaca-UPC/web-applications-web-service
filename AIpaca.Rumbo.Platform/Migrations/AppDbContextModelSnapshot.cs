@@ -19,6 +19,59 @@ namespace AIpaca.Rumbo.Platform.Migrations
                 .HasAnnotation("ProductVersion", "10.0.14")
                 .HasAnnotation("Relational:MaxIdentifierLength", 64);
 
+            modelBuilder.Entity("AIpaca.Rumbo.Platform.RouteScheduleManagement.Domain.Model.Aggregates.Route", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnName("id");
+
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("varchar(20)")
+                        .HasColumnName("code");
+
+                    b.Property<TimeSpan?>("DepartureTime")
+                        .HasColumnType("time")
+                        .HasColumnName("departure_time");
+
+                    b.Property<int>("DriverProfileId")
+                        .HasColumnType("int")
+                        .HasColumnName("driver_profile_id");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(120)
+                        .HasColumnType("varchar(120)")
+                        .HasColumnName("name");
+
+                    b.Property<bool>("ScheduleConfirmed")
+                        .HasColumnType("tinyint(1)")
+                        .HasColumnName("schedule_confirmed");
+
+                    b.Property<int>("Shift")
+                        .HasColumnType("int")
+                        .HasColumnName("shift");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int")
+                        .HasColumnName("status");
+
+                    b.Property<int?>("VehicleId")
+                        .HasColumnType("int")
+                        .HasColumnName("vehicle_id");
+
+                    b.HasKey("Id")
+                        .HasName("p_k_routes");
+
+                    b.HasIndex("Code")
+                        .IsUnique()
+                        .HasDatabaseName("i_x_routes_code");
+
+                    b.ToTable("routes", (string)null);
+                });
+
             modelBuilder.Entity("AIpaca.Rumbo.Platform.VehicleCredentialManagement.Domain.Model.Aggregates.Vehicle", b =>
                 {
                     b.Property<int>("Id")
@@ -60,6 +113,113 @@ namespace AIpaca.Rumbo.Platform.Migrations
                         .HasName("p_k_vehicles");
 
                     b.ToTable("vehicles");
+                });
+
+            modelBuilder.Entity("AIpaca.Rumbo.Platform.RouteScheduleManagement.Domain.Model.Aggregates.Route", b =>
+                {
+                    b.OwnsMany("AIpaca.Rumbo.Platform.RouteScheduleManagement.Domain.Model.Aggregates.RouteAssignment", "Assignments", b1 =>
+                        {
+                            b1.Property<int>("Id")
+                                .ValueGeneratedOnAdd()
+                                .HasColumnType("int")
+                                .HasColumnName("id");
+
+                            b1.Property<int>("RouteId")
+                                .HasColumnType("int")
+                                .HasColumnName("route_id");
+
+                            b1.Property<int>("StopId")
+                                .HasColumnType("int")
+                                .HasColumnName("stop_id");
+
+                            b1.Property<int>("StudentId")
+                                .HasColumnType("int")
+                                .HasColumnName("student_id");
+
+                            b1.HasKey("Id")
+                                .HasName("p_k_route_assignments");
+
+                            b1.HasIndex("RouteId")
+                                .HasDatabaseName("i_x_route_assignments_route_id");
+
+                            b1.ToTable("route_assignments", (string)null);
+
+                            b1.WithOwner()
+                                .HasForeignKey("RouteId")
+                                .HasConstraintName("f_k_route_assignments_routes_route_id");
+                        });
+
+                    b.OwnsMany("AIpaca.Rumbo.Platform.RouteScheduleManagement.Domain.Model.Aggregates.RouteStop", "Stops", b1 =>
+                        {
+                            b1.Property<int>("Id")
+                                .ValueGeneratedOnAdd()
+                                .HasColumnType("int")
+                                .HasColumnName("id");
+
+                            b1.Property<string>("Address")
+                                .IsRequired()
+                                .HasMaxLength(250)
+                                .HasColumnType("varchar(250)")
+                                .HasColumnName("address");
+
+                            b1.Property<int>("Position")
+                                .HasColumnType("int")
+                                .HasColumnName("position");
+
+                            b1.Property<int>("RouteId")
+                                .HasColumnType("int")
+                                .HasColumnName("route_id");
+
+                            b1.HasKey("Id")
+                                .HasName("p_k_route_stops");
+
+                            b1.HasIndex("RouteId")
+                                .HasDatabaseName("i_x_route_stops_route_id");
+
+                            b1.ToTable("route_stops", (string)null);
+
+                            b1.WithOwner()
+                                .HasForeignKey("RouteId")
+                                .HasConstraintName("f_k_route_stops_routes_route_id");
+                        });
+
+                    b.OwnsMany("AIpaca.Rumbo.Platform.RouteScheduleManagement.Domain.Model.ValueObjects.RouteSchedule", "Schedule", b1 =>
+                        {
+                            b1.Property<int>("Id")
+                                .ValueGeneratedOnAdd()
+                                .HasColumnType("int")
+                                .HasColumnName("id");
+
+                            b1.Property<int>("DayOfWeek")
+                                .HasColumnType("int")
+                                .HasColumnName("day_of_week");
+
+                            b1.Property<TimeSpan>("DepartureTime")
+                                .HasColumnType("time")
+                                .HasColumnName("departure_time");
+
+                            b1.Property<int>("RouteId")
+                                .HasColumnType("int")
+                                .HasColumnName("route_id");
+
+                            b1.HasKey("Id")
+                                .HasName("p_k_route_schedules");
+
+                            b1.HasIndex("RouteId")
+                                .HasDatabaseName("i_x_route_schedules_route_id");
+
+                            b1.ToTable("route_schedules", (string)null);
+
+                            b1.WithOwner()
+                                .HasForeignKey("RouteId")
+                                .HasConstraintName("f_k_route_schedules_routes_route_id");
+                        });
+
+                    b.Navigation("Assignments");
+
+                    b.Navigation("Schedule");
+
+                    b.Navigation("Stops");
                 });
 
             modelBuilder.Entity("AIpaca.Rumbo.Platform.VehicleCredentialManagement.Domain.Model.Aggregates.Vehicle", b =>

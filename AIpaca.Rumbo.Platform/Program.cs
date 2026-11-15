@@ -21,6 +21,13 @@ using AIpaca.Rumbo.Platform.VehicleCredentialManagement.Application.QueryService
 using AIpaca.Rumbo.Platform.VehicleCredentialManagement.Domain.Repositories;
 using AIpaca.Rumbo.Platform.VehicleCredentialManagement.Infrastructure.Persistence.EntityFrameworkCore.Configuration.Repositories;
 
+using AIpaca.Rumbo.Platform.RouteScheduleManagement.Application.CommandServices;
+using AIpaca.Rumbo.Platform.RouteScheduleManagement.Application.Internal.CommandServices;
+using AIpaca.Rumbo.Platform.RouteScheduleManagement.Application.Internal.QueryServices;
+using AIpaca.Rumbo.Platform.RouteScheduleManagement.Application.QueryServices;
+using AIpaca.Rumbo.Platform.RouteScheduleManagement.Domain.Repositories;
+using AIpaca.Rumbo.Platform.RouteScheduleManagement.Infrastructure.Persistence.EntityFrameworkCore.Repositories;
+
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddRouting(options => options.LowercaseUrls = true);
@@ -75,7 +82,10 @@ builder.Services.AddScoped<IVehicleQueryService, VehicleQueryService>();
 // Profiles & Relationship Management Bounded Context
 
 // Route & Schedule Management Bounded Context
-
+// Route & Schedule Management Bounded Context
+builder.Services.AddScoped<IRouteRepository, RouteRepository>();
+builder.Services.AddScoped<IRouteCommandService, RouteCommandService>();
+builder.Services.AddScoped<IRouteQueryService, RouteQueryService>();
 // Trip Execution & Monitoring Bounded Context
 
 // Alerting & Incident Management Bounded Context
