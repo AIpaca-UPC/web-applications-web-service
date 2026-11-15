@@ -23,7 +23,31 @@ using Microsoft.Extensions.Localization;
 using Scalar.AspNetCore;
 using ProblemDetailsFactory = AIpaca.Rumbo.Platform.Shared.Interfaces.Rest.ProblemDetails.ProblemDetailsFactory;
 
+using AIpaca.Rumbo.Platform.VehicleCredentialManagement.Application.CommandServices;
+using AIpaca.Rumbo.Platform.VehicleCredentialManagement.Application.Internal.CommandServices;
+using AIpaca.Rumbo.Platform.VehicleCredentialManagement.Application.Internal.QueryServices;
+using AIpaca.Rumbo.Platform.VehicleCredentialManagement.Application.QueryServices;
+using AIpaca.Rumbo.Platform.VehicleCredentialManagement.Domain.Repositories;
+using AIpaca.Rumbo.Platform.VehicleCredentialManagement.Infrastructure.Persistence.EntityFrameworkCore.Configuration.Repositories;
+
+using AIpaca.Rumbo.Platform.SubscriptionBilling.Application.CommandServices;
+using AIpaca.Rumbo.Platform.SubscriptionBilling.Application.Internal.CommandServices;
+using AIpaca.Rumbo.Platform.SubscriptionBilling.Application.Internal.QueryServices;
+using AIpaca.Rumbo.Platform.SubscriptionBilling.Application.QueryServices;
+using AIpaca.Rumbo.Platform.SubscriptionBilling.Domain.Repositories;
+using AIpaca.Rumbo.Platform.SubscriptionBilling.Infrastructure.Persistence.EntityFrameworkCore.Repositories;
+
+using AIpaca.Rumbo.Platform.RouteScheduleManagement.Application.CommandServices;
+using AIpaca.Rumbo.Platform.RouteScheduleManagement.Application.Internal.CommandServices;
+using AIpaca.Rumbo.Platform.RouteScheduleManagement.Application.Internal.QueryServices;
+using AIpaca.Rumbo.Platform.RouteScheduleManagement.Application.QueryServices;
+using AIpaca.Rumbo.Platform.RouteScheduleManagement.Domain.Repositories;
+using AIpaca.Rumbo.Platform.RouteScheduleManagement.Infrastructure.Persistence.EntityFrameworkCore.Repositories;
+
 var builder = WebApplication.CreateBuilder(args);
+var port = Environment.GetEnvironmentVariable("PORT");
+if (!string.IsNullOrWhiteSpace(port))
+    builder.WebHost.UseUrls($"http://0.0.0.0:{port}");
 
 builder.Services.AddRouting(options => options.LowercaseUrls = true);
 builder.Services.AddControllers(options => options.Conventions.Add(new KebabCaseRouteNamingConvention()))
@@ -72,6 +96,9 @@ builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 builder.Services.AddScoped<DispatchDomainEventsInterceptor>();
 
 // Vehicle & Credential Management Bounded Context
+builder.Services.AddScoped<IVehicleRepository, VehicleRepository>();
+builder.Services.AddScoped<IVehicleCommandService, VehicleCommandService>();
+builder.Services.AddScoped<IVehicleQueryService, VehicleQueryService>();
 
 // Profiles & Relationship Management Bounded Context
 builder.Services.AddScoped<IProfileRepository, ProfileRepository>();
@@ -85,12 +112,23 @@ builder.Services.AddScoped<IDataDeletionRequestQueryService, DataDeletionRequest
 builder.Services.AddScoped<IDataDeletionRequestCommandService, DataDeletionRequestCommandService>();
 
 // Route & Schedule Management Bounded Context
+builder.Services.AddScoped<IRouteRepository, RouteRepository>();
+builder.Services.AddScoped<IRouteCommandService, RouteCommandService>();
+builder.Services.AddScoped<IRouteQueryService, RouteQueryService>();
 
 // Trip Execution & Monitoring Bounded Context
 
 // Alerting & Incident Management Bounded Context
 
 // Subscription & Billing Bounded Context
+
+// Subscription & Billing Bounded Context
+builder.Services.AddScoped<IPlanRepository, PlanRepository>();
+builder.Services.AddScoped<ISubscriptionRepository, SubscriptionRepository>();
+builder.Services.AddScoped<IPlanCommandService, PlanCommandService>();
+builder.Services.AddScoped<ISubscriptionCommandService, SubscriptionCommandService>();
+builder.Services.AddScoped<IPlanQueryService, PlanQueryService>();
+builder.Services.AddScoped<ISubscriptionQueryService, SubscriptionQueryService>();
 
 // Identity & Access Management Bounded Context
 
@@ -116,14 +154,16 @@ app.UseRequestLocalization(new RequestLocalizationOptions()
     .AddSupportedCultures(supportedCultures)
     .AddSupportedUICultures(supportedCultures));
 
-if (app.Environment.IsDevelopment())
-{
-    app.MapOpenApi();
-    app.MapScalarApiReference();
-}
+
+app.MapOpenApi();
+app.MapScalarApiReference();
+
 
 app.UseCors("AllowAllPolicy");
-app.UseHttpsRedirection();
+
+if(app.Environment.IsDevelopment())
+    app.UseHttpsRedirection();
+
 app.UseAuthorization();
 app.MapControllers();
 

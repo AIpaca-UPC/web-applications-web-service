@@ -1,5 +1,8 @@
 using AIpaca.Rumbo.Platform.Shared.Infrastructure.Persistence.EntityFrameworkCore.Configuration.Extensions;
 using AIpaca.Rumbo.Platform.Shared.Infrastructure.Persistence.EntityFrameworkCore.Interceptors;
+using AIpaca.Rumbo.Platform.VehicleCredentialManagement.Infrastructure.Persistence.EntityFrameworkCore.Configuration.Extensions;
+using AIpaca.Rumbo.Platform.SubscriptionBilling.Infrastructure.Persistence.EntityFrameworkCore.Configuration.Extensions;
+using AIpaca.Rumbo.Platform.RouteScheduleManagement.Infrastructure.Persistence.EntityFrameworkCore.Configuration.Extensions;
 using Microsoft.EntityFrameworkCore;
 
 namespace AIpaca.Rumbo.Platform.Shared.Infrastructure.Persistence.EntityFrameworkCore.Configuration;
@@ -36,13 +39,13 @@ public class AppDbContext(DbContextOptions options) : DbContext(options)
         base.OnModelCreating(builder);
 
         // Vehicle & Credential Management Context
-        // builder.ApplyVehicleCredentialManagementConfiguration();
+        builder.ApplyVehicleCredentialManagementConfiguration();
 
         // Profiles & Relationship Management Context
         // builder.ApplyProfilesRelationshipManagementConfiguration();
 
         // Route & Schedule Management Context
-        // builder.ApplyRouteScheduleManagementConfiguration();
+        builder.ApplyRouteScheduleManagementConfiguration();
 
         // Trip Execution & Monitoring Context
         // builder.ApplyTripExecutionMonitoringConfiguration();
@@ -51,7 +54,7 @@ public class AppDbContext(DbContextOptions options) : DbContext(options)
         // builder.ApplyAlertingIncidentManagementConfiguration();
 
         // Subscription & Billing Context
-        // builder.ApplySubscriptionBillingConfiguration();
+        builder.ApplySubscriptionBillingConfiguration();
 
         // Identity & Access Management Context
         // builder.ApplyIdentityAccessManagementConfiguration();
