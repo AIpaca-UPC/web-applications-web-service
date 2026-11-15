@@ -21,6 +21,13 @@ using AIpaca.Rumbo.Platform.VehicleCredentialManagement.Application.QueryService
 using AIpaca.Rumbo.Platform.VehicleCredentialManagement.Domain.Repositories;
 using AIpaca.Rumbo.Platform.VehicleCredentialManagement.Infrastructure.Persistence.EntityFrameworkCore.Configuration.Repositories;
 
+using AIpaca.Rumbo.Platform.SubscriptionBilling.Application.CommandServices;
+using AIpaca.Rumbo.Platform.SubscriptionBilling.Application.Internal.CommandServices;
+using AIpaca.Rumbo.Platform.SubscriptionBilling.Application.Internal.QueryServices;
+using AIpaca.Rumbo.Platform.SubscriptionBilling.Application.QueryServices;
+using AIpaca.Rumbo.Platform.SubscriptionBilling.Domain.Repositories;
+using AIpaca.Rumbo.Platform.SubscriptionBilling.Infrastructure.Persistence.EntityFrameworkCore.Repositories;
+
 using AIpaca.Rumbo.Platform.RouteScheduleManagement.Application.CommandServices;
 using AIpaca.Rumbo.Platform.RouteScheduleManagement.Application.Internal.CommandServices;
 using AIpaca.Rumbo.Platform.RouteScheduleManagement.Application.Internal.QueryServices;
@@ -85,15 +92,23 @@ builder.Services.AddScoped<IVehicleQueryService, VehicleQueryService>();
 // Profiles & Relationship Management Bounded Context
 
 // Route & Schedule Management Bounded Context
-// Route & Schedule Management Bounded Context
 builder.Services.AddScoped<IRouteRepository, RouteRepository>();
 builder.Services.AddScoped<IRouteCommandService, RouteCommandService>();
 builder.Services.AddScoped<IRouteQueryService, RouteQueryService>();
+
 // Trip Execution & Monitoring Bounded Context
 
 // Alerting & Incident Management Bounded Context
 
 // Subscription & Billing Bounded Context
+
+// Subscription & Billing Bounded Context
+builder.Services.AddScoped<IPlanRepository, PlanRepository>();
+builder.Services.AddScoped<ISubscriptionRepository, SubscriptionRepository>();
+builder.Services.AddScoped<IPlanCommandService, PlanCommandService>();
+builder.Services.AddScoped<ISubscriptionCommandService, SubscriptionCommandService>();
+builder.Services.AddScoped<IPlanQueryService, PlanQueryService>();
+builder.Services.AddScoped<ISubscriptionQueryService, SubscriptionQueryService>();
 
 // Identity & Access Management Bounded Context
 
