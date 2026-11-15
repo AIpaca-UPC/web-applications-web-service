@@ -1,6 +1,8 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
+using Microsoft.AspNetCore.HttpOverrides;
+
 using AIpaca.Rumbo.Platform.Resources.Errors;
 using AIpaca.Rumbo.Platform.Resources.Shared;
 using AIpaca.Rumbo.Platform.Shared.Domain.Repositories;
@@ -148,6 +150,16 @@ builder.Services.AddScoped(typeof(ICommandPipelineBehavior<>), typeof(Transactio
 builder.Services.AddCortexMediator([typeof(Program)]);
 
 var app = builder.Build();
+
+// Render terminates TLS at its proxy and forwards plain HTTP, so the app only learns the
+// original scheme from the forwarded headers. Without this the generated OpenAPI document
+// advertises http://, and the browser refuses to call it from the https:// documentation page.
+app.UseForwardedHeaders(new ForwardedHeadersOptions
+{
+    ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto,
+    KnownNetworks = { },
+    KnownProxies = { }
+});
 
 using (var scope = app.Services.CreateScope())
 {

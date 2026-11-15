@@ -8,6 +8,8 @@ namespace AIpaca.Rumbo.Platform.Profiles.Application.QueryServices;
 /// </summary>
 public interface IStudentQueryService
 {
+    Task<IEnumerable<Student>> Handle(GetAllStudentsQuery query, CancellationToken cancellationToken);
+    
     Task<Student?> Handle(GetStudentByIdQuery query, CancellationToken cancellationToken);
     
     Task<IEnumerable<Student>> Handle(GetAllStudentsByTutorIdQuery query, CancellationToken cancellationToken);
