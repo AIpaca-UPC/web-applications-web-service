@@ -11,6 +11,32 @@ public class RouteStop
 
     public RouteStop(string address, int position)
     {
+        UpdateDetails(address, position);
+    }
+
+    /// <summary>
+    /// Reconstructs an existing stop keeping its identifier.
+    /// </summary>
+    public RouteStop(int id, string address, int position)
+        : this(address, position)
+    {
+        if (id < 1)
+            throw new ArgumentOutOfRangeException(nameof(id));
+
+        Id = id;
+    }
+
+    public int Id { get; private set; }
+
+    public string Address { get; private set; } = string.Empty;
+
+    public int Position { get; private set; }
+
+    /// <summary>
+    /// Updates the address and ordered position of a stop.
+    /// </summary>
+    internal void UpdateDetails(string address, int position)
+    {
         if (string.IsNullOrWhiteSpace(address))
             throw new ArgumentException(
                 "Stop address cannot be blank.", nameof(address));
@@ -21,10 +47,4 @@ public class RouteStop
         Address = address.Trim();
         Position = position;
     }
-
-    public int Id { get; private set; }
-
-    public string Address { get; private set; } = string.Empty;
-
-    public int Position { get; private set; }
 }
