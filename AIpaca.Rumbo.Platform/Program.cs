@@ -1,3 +1,9 @@
+using AIpaca.Rumbo.Platform.AlertingIncidentManagement.Application.CommandServices;
+using AIpaca.Rumbo.Platform.AlertingIncidentManagement.Application.Internal.CommandServices;
+using AIpaca.Rumbo.Platform.AlertingIncidentManagement.Application.Internal.QueryServices;
+using AIpaca.Rumbo.Platform.AlertingIncidentManagement.Application.QueryServices;
+using AIpaca.Rumbo.Platform.AlertingIncidentManagement.Domain.Repositories;
+using AIpaca.Rumbo.Platform.AlertingIncidentManagement.Infrastructure.Persistence.EntityFrameworkCore.Repositories;
 using AIpaca.Rumbo.Platform.Resources.Errors;
 using AIpaca.Rumbo.Platform.Resources.Shared;
 using AIpaca.Rumbo.Platform.Shared.Domain.Repositories;
@@ -79,6 +85,9 @@ builder.Services.AddScoped<IVehicleQueryService, VehicleQueryService>();
 // Trip Execution & Monitoring Bounded Context
 
 // Alerting & Incident Management Bounded Context
+builder.Services.AddScoped<INotificationRepository, NotificationRepository>();
+builder.Services.AddScoped<INotificationCommandService, NotificationCommandService>();
+builder.Services.AddScoped<INotificationQueryService, NotificationQueryService>();
 
 // Subscription & Billing Bounded Context
 
