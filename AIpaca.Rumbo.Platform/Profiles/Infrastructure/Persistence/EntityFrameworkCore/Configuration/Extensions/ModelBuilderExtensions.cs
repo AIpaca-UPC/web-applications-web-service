@@ -3,6 +3,7 @@ using AIpaca.Rumbo.Platform.Profiles.Domain.Model.Entities;
 using AIpaca.Rumbo.Platform.Profiles.Domain.Model.ValueObjects;
 using AIpaca.Rumbo.Platform.Shared.Infrastructure.Persistence.EntityFrameworkCore.Configuration.ValueConverters;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace AIpaca.Rumbo.Platform.Profiles.Infrastructure.Persistence.EntityFrameworkCore.Configuration.Extensions;
 
@@ -67,7 +68,15 @@ public static class ModelBuilderExtensions
                     .HasColumnName("LastName").HasMaxLength(40).IsRequired(); 
             });
         
+        // Convert DateOnly to DateTime for the MySQL provider.
+        // Preserve the SQL DATE column type without a time component.
+        var dateOnlyConverter = new ValueConverter<DateOnly, DateTime>(
+            date => date.ToDateTime(TimeOnly.MinValue),
+            dateTime => DateOnly.FromDateTime(dateTime));
+        
         builder.Entity<Student>().Property(s => s.BirthDate)
+            .HasConversion(dateOnlyConverter)
+            .HasColumnType("date")
             .IsRequired();
 
         builder.Entity<Student>().Property(s => s.Status)
