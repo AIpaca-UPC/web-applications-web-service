@@ -2,7 +2,6 @@ using AIpaca.Rumbo.Platform.Shared.Infrastructure.Persistence.EntityFrameworkCor
 using AIpaca.Rumbo.Platform.VehicleCredentialManagement.Domain.Model.Aggregates;
 using AIpaca.Rumbo.Platform.VehicleCredentialManagement.Domain.Model.ValueObjects;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace AIpaca.Rumbo.Platform.VehicleCredentialManagement.Infrastructure.Persistence.EntityFrameworkCore.Configuration.Extensions;
 
@@ -43,21 +42,6 @@ public static class ModelBuilderExtensions
             plate.HasIndex(p => p.Value).IsUnique();
         });
 
-        // The MySQL provider writes DateOnly into a DATE column but reads it back as DateTime,
-        // so the value is mapped explicitly in both directions. Subscription & Billing needed
-        // the same thing; when a third context does, the converter belongs in Shared.
-        var nullableDateOnlyConverter = new ValueConverter<DateOnly?, DateTime?>(
-            date => date == null ? null : date.Value.ToDateTime(TimeOnly.MinValue),
-            dateTime => dateTime == null ? null : DateOnly.FromDateTime(dateTime.Value));
-
-        // Same provider limitation, one type over: a DATETIME column carries no offset, so the
-        // instant is stored in UTC and read back as a UTC offset rather than as a local time.
-        var nullableInstantConverter = new ValueConverter<DateTimeOffset?, DateTime?>(
-            value => value == null ? null : value.Value.UtcDateTime,
-            value => value == null
-                ? null
-                : new DateTimeOffset(DateTime.SpecifyKind(value.Value, DateTimeKind.Utc)));
-
         // Credentials belong to the vehicle: they are written and read with it, and a
         // credential cannot exist without the vehicle that declared it.
         builder.Entity<Vehicle>().OwnsMany(v => v.Credentials, credential =>
@@ -67,14 +51,10 @@ public static class ModelBuilderExtensions
             credential.HasKey("Id");
             credential.Property(c => c.Type).IsRequired();
             credential.Property(c => c.Number).IsRequired().HasMaxLength(40);
-            credential.Property(c => c.ExpiresAt)
-                .HasConversion(nullableDateOnlyConverter)
-                .HasColumnType("date");
+            credential.Property(c => c.ExpiresAt);
             credential.Property(c => c.VerificationStatus).IsRequired();
             credential.Property(c => c.VerificationSource).HasMaxLength(120);
-            credential.Property(c => c.VerifiedAt)
-                .HasConversion(nullableInstantConverter)
-                .HasColumnType("datetime");
+            credential.Property(c => c.VerifiedAt);
         });
     }
 }
