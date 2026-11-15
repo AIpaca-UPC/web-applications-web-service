@@ -39,6 +39,18 @@ public class StudentsController(
             foundStudent => Ok(StudentResourceFromEntityAssembler.ToResourceFromEntity(foundStudent)));
     }
     
+    [HttpGet]
+    [EndpointSummary("Get all students")]
+    [EndpointDescription("Get all students")]
+    [ProducesResponseType(typeof(IEnumerable<StudentResource>), StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetAllStudents(CancellationToken cancellationToken)
+    {
+        var getAllStudentsQuery = new GetAllStudentsQuery();
+        var students = await studentQueryService.Handle(getAllStudentsQuery, cancellationToken);
+        var studentResources = students.Select(StudentResourceFromEntityAssembler.ToResourceFromEntity);
+        return Ok(studentResources);
+    }
+    
     [HttpGet("tutors/{tutorId:int}")]
     [EndpointSummary("Get all students by tutor Id")]
     [EndpointDescription("Get all students for which the tutor has an authorized relationship")]
