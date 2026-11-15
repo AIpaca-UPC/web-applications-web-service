@@ -32,4 +32,25 @@ public interface ISubscriptionCommandService
     Task<Result<SubscriptionActivation>> Handle(
         ActivateSubscriptionCommand command,
         CancellationToken cancellationToken = default);
+    
+    /// <summary>
+    ///     Changes a subscription between active and paused.
+    /// </summary>
+    /// <param name="command">The status change command.</param>
+    /// <param name="cancellationToken">The cancellation token.</param>
+    /// <returns>The updated subscription.</returns>
+    Task<Result<Subscription>> Handle(
+        ChangeSubscriptionStatusCommand command,
+        CancellationToken cancellationToken = default);
+
+    /// <summary>
+    ///     Cancels a subscription without deleting its history.
+    /// </summary>
+    /// <param name="command">The cancellation command.</param>
+    /// <param name="cancellationToken">The cancellation token.</param>
+    /// <returns>The cancelled subscription.</returns>
+    Task<Result<Subscription>> Handle(
+        CancelSubscriptionCommand command,
+        CancellationToken cancellationToken = default);
+
 }

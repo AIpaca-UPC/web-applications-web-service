@@ -22,5 +22,10 @@ public enum SubscriptionsError
     SubscriptionAlreadyExists = 4,
 
     /// <summary>The supplied subscription data is invalid.</summary>
-    InvalidSubscriptionData = 5
+    InvalidSubscriptionData = 5,
+    /// <summary>
+    ///     The subscription cannot perform the requested
+    ///     lifecycle transition.
+    /// </summary>
+    SubscriptionStatusConflict = 6
 }
