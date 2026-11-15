@@ -1,12 +1,6 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using AIpaca.Rumbo.Platform.Profiles.Application.CommandServices;
-using AIpaca.Rumbo.Platform.Profiles.Application.Internal.CommandServices;
-using AIpaca.Rumbo.Platform.Profiles.Application.Internal.QueryServices;
-using AIpaca.Rumbo.Platform.Profiles.Application.QueryServices;
-using AIpaca.Rumbo.Platform.Profiles.Domain.Repositories;
-using AIpaca.Rumbo.Platform.Profiles.Infrastructure.Persistence.EntityFrameworkCore.Configuration;
-using AIpaca.Rumbo.Platform.Profiles.Infrastructure.Persistence.EntityFrameworkCore.Repositories;
+
 using AIpaca.Rumbo.Platform.Resources.Errors;
 using AIpaca.Rumbo.Platform.Resources.Shared;
 using AIpaca.Rumbo.Platform.Shared.Domain.Repositories;
@@ -30,12 +24,12 @@ using AIpaca.Rumbo.Platform.VehicleCredentialManagement.Application.QueryService
 using AIpaca.Rumbo.Platform.VehicleCredentialManagement.Domain.Repositories;
 using AIpaca.Rumbo.Platform.VehicleCredentialManagement.Infrastructure.Persistence.EntityFrameworkCore.Configuration.Repositories;
 
-using AIpaca.Rumbo.Platform.SubscriptionBilling.Application.CommandServices;
-using AIpaca.Rumbo.Platform.SubscriptionBilling.Application.Internal.CommandServices;
-using AIpaca.Rumbo.Platform.SubscriptionBilling.Application.Internal.QueryServices;
-using AIpaca.Rumbo.Platform.SubscriptionBilling.Application.QueryServices;
-using AIpaca.Rumbo.Platform.SubscriptionBilling.Domain.Repositories;
-using AIpaca.Rumbo.Platform.SubscriptionBilling.Infrastructure.Persistence.EntityFrameworkCore.Repositories;
+using AIpaca.Rumbo.Platform.Profiles.Application.CommandServices;
+using AIpaca.Rumbo.Platform.Profiles.Application.Internal.CommandServices;
+using AIpaca.Rumbo.Platform.Profiles.Application.Internal.QueryServices;
+using AIpaca.Rumbo.Platform.Profiles.Application.QueryServices;
+using AIpaca.Rumbo.Platform.Profiles.Domain.Repositories;
+using AIpaca.Rumbo.Platform.Profiles.Infrastructure.Persistence.EntityFrameworkCore.Repositories;
 
 using AIpaca.Rumbo.Platform.RouteScheduleManagement.Application.CommandServices;
 using AIpaca.Rumbo.Platform.RouteScheduleManagement.Application.Internal.CommandServices;
@@ -43,6 +37,20 @@ using AIpaca.Rumbo.Platform.RouteScheduleManagement.Application.Internal.QuerySe
 using AIpaca.Rumbo.Platform.RouteScheduleManagement.Application.QueryServices;
 using AIpaca.Rumbo.Platform.RouteScheduleManagement.Domain.Repositories;
 using AIpaca.Rumbo.Platform.RouteScheduleManagement.Infrastructure.Persistence.EntityFrameworkCore.Repositories;
+
+using AIpaca.Rumbo.Platform.AlertingIncidentManagement.Application.CommandServices;
+using AIpaca.Rumbo.Platform.AlertingIncidentManagement.Application.Internal.CommandServices;
+using AIpaca.Rumbo.Platform.AlertingIncidentManagement.Application.Internal.QueryServices;
+using AIpaca.Rumbo.Platform.AlertingIncidentManagement.Application.QueryServices;
+using AIpaca.Rumbo.Platform.AlertingIncidentManagement.Domain.Repositories;
+using AIpaca.Rumbo.Platform.AlertingIncidentManagement.Infrastructure.Persistence.EntityFrameworkCore.Repositories;
+
+using AIpaca.Rumbo.Platform.SubscriptionBilling.Application.CommandServices;
+using AIpaca.Rumbo.Platform.SubscriptionBilling.Application.Internal.CommandServices;
+using AIpaca.Rumbo.Platform.SubscriptionBilling.Application.Internal.QueryServices;
+using AIpaca.Rumbo.Platform.SubscriptionBilling.Application.QueryServices;
+using AIpaca.Rumbo.Platform.SubscriptionBilling.Domain.Repositories;
+using AIpaca.Rumbo.Platform.SubscriptionBilling.Infrastructure.Persistence.EntityFrameworkCore.Repositories;
 
 var builder = WebApplication.CreateBuilder(args);
 var port = Environment.GetEnvironmentVariable("PORT");
@@ -67,7 +75,7 @@ builder.Services.AddCors(options =>
             .AllowAnyHeader());
 });
 
-builder.Services.AddDbContext<AppDbContext, ProfilesDbContext>((serviceProvider, options) =>
+builder.Services.AddDbContext<AppDbContext>((serviceProvider, options) =>
 {
     var connectionStringTemplate = builder.Configuration.GetConnectionString("DefaultConnection");
     if (string.IsNullOrWhiteSpace(connectionStringTemplate))
@@ -119,8 +127,9 @@ builder.Services.AddScoped<IRouteQueryService, RouteQueryService>();
 // Trip Execution & Monitoring Bounded Context
 
 // Alerting & Incident Management Bounded Context
-
-// Subscription & Billing Bounded Context
+builder.Services.AddScoped<INotificationRepository, NotificationRepository>();
+builder.Services.AddScoped<INotificationCommandService, NotificationCommandService>();
+builder.Services.AddScoped<INotificationQueryService, NotificationQueryService>();
 
 // Subscription & Billing Bounded Context
 builder.Services.AddScoped<IPlanRepository, PlanRepository>();

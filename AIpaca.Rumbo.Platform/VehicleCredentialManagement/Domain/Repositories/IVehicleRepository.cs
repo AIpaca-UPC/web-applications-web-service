@@ -26,7 +26,7 @@ public interface IVehicleRepository : IBaseRepository<Vehicle>
     /// </summary>
     /// <param name="plate">The plate to look for.</param>
     /// <param name="cancellationToken">The cancellation token.</param>
-    /// <returns>The vehicle, or <c>null</c> when no vehicle carries that plate.</returns>
+    /// <returns>The vehicle or <c>null</c> when no vehicle carries that plate.</returns>
     Task<Vehicle?> FindByLicensePlateAsync(LicensePlate plate, CancellationToken cancellationToken = default);
 
     /// <summary>
