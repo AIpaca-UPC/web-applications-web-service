@@ -2,13 +2,16 @@
 
 public enum EProfileErrors
 {
-    None, 
-    ProfileNotFound,
-    PhoneNumberAlreadyRegistered,
+    None,
     InvalidProfileData,
-    DeletionRequestAlreadyExists,
-    StudentIsInactive,
     OperationCancelled,
     DatabaseError,
-    InternalServerError
+    InternalServerError,
+    ProfileNotFound,
+    StudentNotFound,
+    DeletionRequestNotFound,
+    AccountAlreadyHasProfile,
+    AuthorizedTutorRequired,
+    DeletionApprovalUnavailable,
+    ConcurrentUpdate
 }
