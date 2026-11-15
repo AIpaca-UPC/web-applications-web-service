@@ -1,6 +1,10 @@
 using AIpaca.Rumbo.Platform.Shared.Infrastructure.Persistence.EntityFrameworkCore.Configuration.Extensions;
 using AIpaca.Rumbo.Platform.Shared.Infrastructure.Persistence.EntityFrameworkCore.Interceptors;
 using AIpaca.Rumbo.Platform.VehicleCredentialManagement.Infrastructure.Persistence.EntityFrameworkCore.Configuration.Extensions;
+using AIpaca.Rumbo.Platform.Profiles.Infrastructure.Persistence.EntityFrameworkCore.Configuration.Extensions;
+using AIpaca.Rumbo.Platform.RouteScheduleManagement.Infrastructure.Persistence.EntityFrameworkCore.Configuration.Extensions;
+using AIpaca.Rumbo.Platform.AlertingIncidentManagement.Infrastructure.Persistence.EntityFrameworkCore.Configuration.Extensions;
+using AIpaca.Rumbo.Platform.SubscriptionBilling.Infrastructure.Persistence.EntityFrameworkCore.Configuration.Extensions;
 using Microsoft.EntityFrameworkCore;
 
 namespace AIpaca.Rumbo.Platform.Shared.Infrastructure.Persistence.EntityFrameworkCore.Configuration;
@@ -40,19 +44,19 @@ public class AppDbContext(DbContextOptions options) : DbContext(options)
         builder.ApplyVehicleCredentialManagementConfiguration();
 
         // Profiles & Relationship Management Context
-        // builder.ApplyProfilesRelationshipManagementConfiguration();
+        builder.ApplyProfilesRelationshipManagementConfiguration();
 
         // Route & Schedule Management Context
-        // builder.ApplyRouteScheduleManagementConfiguration();
+        builder.ApplyRouteScheduleManagementConfiguration();
 
         // Trip Execution & Monitoring Context
         // builder.ApplyTripExecutionMonitoringConfiguration();
 
         // Alerting & Incident Management Context
-        // builder.ApplyAlertingIncidentManagementConfiguration();
+        builder.ApplyAlertingIncidentManagementDefaultConfiguration();
 
         // Subscription & Billing Context
-        // builder.ApplySubscriptionBillingConfiguration();
+        builder.ApplySubscriptionBillingConfiguration();
 
         // Identity & Access Management Context
         // builder.ApplyIdentityAccessManagementConfiguration();

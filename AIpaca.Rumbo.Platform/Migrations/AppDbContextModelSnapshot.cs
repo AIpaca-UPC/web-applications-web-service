@@ -19,6 +19,372 @@ namespace AIpaca.Rumbo.Platform.Migrations
                 .HasAnnotation("ProductVersion", "10.0.14")
                 .HasAnnotation("Relational:MaxIdentifierLength", 64);
 
+            modelBuilder.Entity("AIpaca.Rumbo.Platform.AlertingIncidentManagement.Domain.Model.Aggregates.Notification", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnName("id");
+
+                    b.Property<int>("Category")
+                        .HasColumnType("int")
+                        .HasColumnName("category");
+
+                    b.Property<int?>("JourneyEventType")
+                        .HasColumnType("int")
+                        .HasColumnName("journey_event_type");
+
+                    b.Property<string>("Message")
+                        .IsRequired()
+                        .HasMaxLength(1000)
+                        .HasColumnType("varchar(1000)")
+                        .HasColumnName("message");
+
+                    b.Property<int>("Priority")
+                        .HasColumnType("int")
+                        .HasColumnName("priority");
+
+                    b.Property<DateTimeOffset?>("ReadAt")
+                        .HasColumnType("datetime")
+                        .HasColumnName("read_at");
+
+                    b.Property<int>("RecipientProfileId")
+                        .HasColumnType("int")
+                        .HasColumnName("recipient_profile_id");
+
+                    b.Property<int>("RouteId")
+                        .HasColumnType("int")
+                        .HasColumnName("route_id");
+
+                    b.Property<int>("StudentId")
+                        .HasColumnType("int")
+                        .HasColumnName("student_id");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(120)
+                        .HasColumnType("varchar(120)")
+                        .HasColumnName("title");
+
+                    b.Property<int>("TripId")
+                        .HasColumnType("int")
+                        .HasColumnName("trip_id");
+
+                    b.Property<int>("Type")
+                        .HasColumnType("int")
+                        .HasColumnName("type");
+
+                    b.HasKey("Id")
+                        .HasName("p_k_notifications");
+
+                    b.ToTable("notifications");
+                });
+
+            modelBuilder.Entity("AIpaca.Rumbo.Platform.Profiles.Domain.Model.Aggregates.DataDeletionRequest", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnName("id");
+
+                    b.Property<DateTimeOffset?>("CreatedAt")
+                        .HasColumnType("datetime")
+                        .HasColumnName("created_at");
+
+                    b.Property<int>("RequestedByTutorId")
+                        .HasColumnType("int")
+                        .HasColumnName("requested_by_tutor_id");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("longtext")
+                        .HasColumnName("status");
+
+                    b.Property<int>("StudentId")
+                        .HasColumnType("int")
+                        .HasColumnName("student_id");
+
+                    b.Property<DateTimeOffset?>("UpdatedAt")
+                        .HasColumnType("datetime")
+                        .HasColumnName("updated_at");
+
+                    b.HasKey("Id")
+                        .HasName("p_k_data_deletion_requests");
+
+                    b.ToTable("data_deletion_requests", (string)null);
+                });
+
+            modelBuilder.Entity("AIpaca.Rumbo.Platform.Profiles.Domain.Model.Aggregates.Profile", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnName("id");
+
+                    b.Property<int>("AccountId")
+                        .HasColumnType("int")
+                        .HasColumnName("account_id");
+
+                    b.Property<DateTimeOffset?>("CreatedAt")
+                        .HasColumnType("datetime")
+                        .HasColumnName("created_at");
+
+                    b.Property<int>("ProfileType")
+                        .HasColumnType("int")
+                        .HasColumnName("profile_type");
+
+                    b.Property<DateTimeOffset?>("UpdatedAt")
+                        .HasColumnType("datetime")
+                        .HasColumnName("updated_at");
+
+                    b.HasKey("Id")
+                        .HasName("p_k_profiles");
+
+                    b.HasIndex("AccountId")
+                        .IsUnique()
+                        .HasDatabaseName("i_x_profiles_account_id");
+
+                    b.ToTable("profiles", (string)null);
+                });
+
+            modelBuilder.Entity("AIpaca.Rumbo.Platform.Profiles.Domain.Model.Aggregates.Student", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnName("id");
+
+                    b.Property<DateOnly>("BirthDate")
+                        .HasColumnType("date")
+                        .HasColumnName("birth_date");
+
+                    b.Property<DateTimeOffset?>("CreatedAt")
+                        .HasColumnType("datetime")
+                        .HasColumnName("created_at");
+
+                    b.Property<string>("SchoolName")
+                        .IsRequired()
+                        .HasColumnType("longtext")
+                        .HasColumnName("school_name");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("longtext")
+                        .HasColumnName("status");
+
+                    b.Property<DateTimeOffset?>("UpdatedAt")
+                        .HasColumnType("datetime")
+                        .HasColumnName("updated_at");
+
+                    b.HasKey("Id")
+                        .HasName("p_k_students");
+
+                    b.ToTable("students", (string)null);
+                });
+
+            modelBuilder.Entity("AIpaca.Rumbo.Platform.Profiles.Domain.Model.Entities.TutorStudentRelationship", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnName("id");
+
+                    b.Property<string>("AuthorizationStatus")
+                        .IsRequired()
+                        .HasColumnType("longtext")
+                        .HasColumnName("authorization_status");
+
+                    b.Property<string>("RelationshipType")
+                        .IsRequired()
+                        .HasColumnType("longtext")
+                        .HasColumnName("relationship_type");
+
+                    b.Property<int>("StudentId")
+                        .HasColumnType("int")
+                        .HasColumnName("student_id");
+
+                    b.Property<int>("TutorProfileId")
+                        .HasColumnType("int")
+                        .HasColumnName("tutor_profile_id");
+
+                    b.HasKey("Id")
+                        .HasName("p_k_tutor_student_relationships");
+
+                    b.ToTable("tutor_student_relationships", (string)null);
+                });
+
+            modelBuilder.Entity("AIpaca.Rumbo.Platform.RouteScheduleManagement.Domain.Model.Aggregates.Route", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnName("id");
+
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("varchar(20)")
+                        .HasColumnName("code");
+
+                    b.Property<TimeSpan?>("DepartureTime")
+                        .HasColumnType("time")
+                        .HasColumnName("departure_time");
+
+                    b.Property<int>("DriverProfileId")
+                        .HasColumnType("int")
+                        .HasColumnName("driver_profile_id");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(120)
+                        .HasColumnType("varchar(120)")
+                        .HasColumnName("name");
+
+                    b.Property<bool>("ScheduleConfirmed")
+                        .HasColumnType("tinyint(1)")
+                        .HasColumnName("schedule_confirmed");
+
+                    b.Property<int>("Shift")
+                        .HasColumnType("int")
+                        .HasColumnName("shift");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int")
+                        .HasColumnName("status");
+
+                    b.Property<int?>("VehicleId")
+                        .HasColumnType("int")
+                        .HasColumnName("vehicle_id");
+
+                    b.HasKey("Id")
+                        .HasName("p_k_routes");
+
+                    b.HasIndex("Code")
+                        .IsUnique()
+                        .HasDatabaseName("i_x_routes_code");
+
+                    b.ToTable("routes", (string)null);
+                });
+
+            modelBuilder.Entity("AIpaca.Rumbo.Platform.SubscriptionBilling.Domain.Model.Aggregates.Plan", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnName("id");
+
+                    b.Property<bool>("Active")
+                        .HasColumnType("tinyint(1)")
+                        .HasColumnName("active");
+
+                    b.Property<int?>("BillingPeriodMonths")
+                        .HasColumnType("int")
+                        .HasColumnName("billing_period_months");
+
+                    b.Property<string>("Currency")
+                        .IsRequired()
+                        .HasMaxLength(3)
+                        .HasColumnType("varchar(3)")
+                        .HasColumnName("currency");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("varchar(500)")
+                        .HasColumnName("description");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("varchar(100)")
+                        .HasColumnName("name");
+
+                    b.Property<decimal>("ReferencePrice")
+                        .HasPrecision(10, 2)
+                        .HasColumnType("decimal(10,2)")
+                        .HasColumnName("reference_price");
+
+                    b.Property<int?>("VehicleLimit")
+                        .HasColumnType("int")
+                        .HasColumnName("vehicle_limit");
+
+                    b.HasKey("Id")
+                        .HasName("p_k_billing_plans");
+
+                    b.HasIndex("Name")
+                        .IsUnique()
+                        .HasDatabaseName("i_x_billing_plans_name");
+
+                    b.ToTable("billing_plans", (string)null);
+                });
+
+            modelBuilder.Entity("AIpaca.Rumbo.Platform.SubscriptionBilling.Domain.Model.Aggregates.Subscription", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnName("id");
+
+                    b.Property<bool>("AutoRenew")
+                        .HasColumnType("tinyint(1)")
+                        .HasColumnName("auto_renew");
+
+                    b.Property<DateTime?>("CancelledAt")
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("cancelled_at");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("created_at");
+
+                    b.Property<DateTime>("CurrentPeriodEnd")
+                        .HasColumnType("date")
+                        .HasColumnName("current_period_end");
+
+                    b.Property<DateTime>("CurrentPeriodStart")
+                        .HasColumnType("date")
+                        .HasColumnName("current_period_start");
+
+                    b.Property<string>("DriverProfileId")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("varchar(100)")
+                        .HasColumnName("driver_profile_id");
+
+                    b.Property<DateTime?>("PausedAt")
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("paused_at");
+
+                    b.Property<int>("PlanId")
+                        .HasColumnType("int")
+                        .HasColumnName("plan_id");
+
+                    b.Property<DateTime>("StartedAt")
+                        .HasColumnType("date")
+                        .HasColumnName("started_at");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("varchar(20)")
+                        .HasColumnName("status");
+
+                    b.Property<int?>("VehicleLimit")
+                        .HasColumnType("int")
+                        .HasColumnName("vehicle_limit");
+
+                    b.HasKey("Id")
+                        .HasName("p_k_billing_subscriptions");
+
+                    b.HasIndex("DriverProfileId")
+                        .HasDatabaseName("i_x_billing_subscriptions_driver_profile_id");
+
+                    b.HasIndex("PlanId")
+                        .HasDatabaseName("i_x_billing_subscriptions_plan_id");
+
+                    b.ToTable("billing_subscriptions", (string)null);
+                });
+
             modelBuilder.Entity("AIpaca.Rumbo.Platform.VehicleCredentialManagement.Domain.Model.Aggregates.Vehicle", b =>
                 {
                     b.Property<int>("Id")
@@ -60,6 +426,216 @@ namespace AIpaca.Rumbo.Platform.Migrations
                         .HasName("p_k_vehicles");
 
                     b.ToTable("vehicles");
+                });
+
+            modelBuilder.Entity("AIpaca.Rumbo.Platform.Profiles.Domain.Model.Aggregates.Profile", b =>
+                {
+                    b.OwnsOne("AIpaca.Rumbo.Platform.Profiles.Domain.Model.ValueObjects.PersonName", "Name", b1 =>
+                        {
+                            b1.Property<int>("Id")
+                                .HasColumnType("int")
+                                .HasColumnName("id");
+
+                            b1.Property<string>("FirstName")
+                                .IsRequired()
+                                .HasMaxLength(40)
+                                .HasColumnType("varchar(40)")
+                                .HasColumnName("first_name");
+
+                            b1.Property<string>("LastName")
+                                .IsRequired()
+                                .HasMaxLength(40)
+                                .HasColumnType("varchar(40)")
+                                .HasColumnName("last_name");
+
+                            b1.HasKey("Id")
+                                .HasName("p_k_profiles");
+
+                            b1.ToTable("profiles");
+
+                            b1.WithOwner()
+                                .HasForeignKey("Id")
+                                .HasConstraintName("f_k_profiles_profiles_id");
+                        });
+
+                    b.OwnsOne("AIpaca.Rumbo.Platform.Profiles.Domain.Model.ValueObjects.PhoneNumber", "PhoneNumber", b1 =>
+                        {
+                            b1.Property<int>("Id")
+                                .HasColumnType("int")
+                                .HasColumnName("id");
+
+                            b1.Property<string>("Number")
+                                .IsRequired()
+                                .HasMaxLength(9)
+                                .HasColumnType("varchar(9)")
+                                .HasColumnName("phone_number");
+
+                            b1.HasKey("Id")
+                                .HasName("p_k_profiles");
+
+                            b1.ToTable("profiles");
+
+                            b1.WithOwner()
+                                .HasForeignKey("Id")
+                                .HasConstraintName("f_k_profiles_profiles_id");
+                        });
+
+                    b.Navigation("Name")
+                        .IsRequired();
+
+                    b.Navigation("PhoneNumber")
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("AIpaca.Rumbo.Platform.Profiles.Domain.Model.Aggregates.Student", b =>
+                {
+                    b.OwnsOne("AIpaca.Rumbo.Platform.Profiles.Domain.Model.ValueObjects.PersonName", "Name", b1 =>
+                        {
+                            b1.Property<int>("Id")
+                                .HasColumnType("int")
+                                .HasColumnName("id");
+
+                            b1.Property<string>("FirstName")
+                                .IsRequired()
+                                .HasMaxLength(40)
+                                .HasColumnType("varchar(40)")
+                                .HasColumnName("first_name");
+
+                            b1.Property<string>("LastName")
+                                .IsRequired()
+                                .HasMaxLength(40)
+                                .HasColumnType("varchar(40)")
+                                .HasColumnName("last_name");
+
+                            b1.HasKey("Id")
+                                .HasName("p_k_students");
+
+                            b1.ToTable("students");
+
+                            b1.WithOwner()
+                                .HasForeignKey("Id")
+                                .HasConstraintName("f_k_students_students_id");
+                        });
+
+                    b.Navigation("Name")
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("AIpaca.Rumbo.Platform.RouteScheduleManagement.Domain.Model.Aggregates.Route", b =>
+                {
+                    b.OwnsMany("AIpaca.Rumbo.Platform.RouteScheduleManagement.Domain.Model.Aggregates.RouteAssignment", "Assignments", b1 =>
+                        {
+                            b1.Property<int>("Id")
+                                .ValueGeneratedOnAdd()
+                                .HasColumnType("int")
+                                .HasColumnName("id");
+
+                            b1.Property<int>("RouteId")
+                                .HasColumnType("int")
+                                .HasColumnName("route_id");
+
+                            b1.Property<int>("StopId")
+                                .HasColumnType("int")
+                                .HasColumnName("stop_id");
+
+                            b1.Property<int>("StudentId")
+                                .HasColumnType("int")
+                                .HasColumnName("student_id");
+
+                            b1.HasKey("Id")
+                                .HasName("p_k_route_assignments");
+
+                            b1.HasIndex("RouteId")
+                                .HasDatabaseName("i_x_route_assignments_route_id");
+
+                            b1.ToTable("route_assignments", (string)null);
+
+                            b1.WithOwner()
+                                .HasForeignKey("RouteId")
+                                .HasConstraintName("f_k_route_assignments_routes_route_id");
+                        });
+
+                    b.OwnsMany("AIpaca.Rumbo.Platform.RouteScheduleManagement.Domain.Model.Aggregates.RouteStop", "Stops", b1 =>
+                        {
+                            b1.Property<int>("Id")
+                                .ValueGeneratedOnAdd()
+                                .HasColumnType("int")
+                                .HasColumnName("id");
+
+                            b1.Property<string>("Address")
+                                .IsRequired()
+                                .HasMaxLength(250)
+                                .HasColumnType("varchar(250)")
+                                .HasColumnName("address");
+
+                            b1.Property<int>("Position")
+                                .HasColumnType("int")
+                                .HasColumnName("position");
+
+                            b1.Property<int>("RouteId")
+                                .HasColumnType("int")
+                                .HasColumnName("route_id");
+
+                            b1.HasKey("Id")
+                                .HasName("p_k_route_stops");
+
+                            b1.HasIndex("RouteId")
+                                .HasDatabaseName("i_x_route_stops_route_id");
+
+                            b1.ToTable("route_stops", (string)null);
+
+                            b1.WithOwner()
+                                .HasForeignKey("RouteId")
+                                .HasConstraintName("f_k_route_stops_routes_route_id");
+                        });
+
+                    b.OwnsMany("AIpaca.Rumbo.Platform.RouteScheduleManagement.Domain.Model.ValueObjects.RouteSchedule", "Schedule", b1 =>
+                        {
+                            b1.Property<int>("Id")
+                                .ValueGeneratedOnAdd()
+                                .HasColumnType("int")
+                                .HasColumnName("id");
+
+                            b1.Property<int>("DayOfWeek")
+                                .HasColumnType("int")
+                                .HasColumnName("day_of_week");
+
+                            b1.Property<TimeSpan>("DepartureTime")
+                                .HasColumnType("time")
+                                .HasColumnName("departure_time");
+
+                            b1.Property<int>("RouteId")
+                                .HasColumnType("int")
+                                .HasColumnName("route_id");
+
+                            b1.HasKey("Id")
+                                .HasName("p_k_route_schedules");
+
+                            b1.HasIndex("RouteId")
+                                .HasDatabaseName("i_x_route_schedules_route_id");
+
+                            b1.ToTable("route_schedules", (string)null);
+
+                            b1.WithOwner()
+                                .HasForeignKey("RouteId")
+                                .HasConstraintName("f_k_route_schedules_routes_route_id");
+                        });
+
+                    b.Navigation("Assignments");
+
+                    b.Navigation("Schedule");
+
+                    b.Navigation("Stops");
+                });
+
+            modelBuilder.Entity("AIpaca.Rumbo.Platform.SubscriptionBilling.Domain.Model.Aggregates.Subscription", b =>
+                {
+                    b.HasOne("AIpaca.Rumbo.Platform.SubscriptionBilling.Domain.Model.Aggregates.Plan", null)
+                        .WithMany()
+                        .HasForeignKey("PlanId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("f_k_billing_subscriptions_billing_plans_plan_id");
                 });
 
             modelBuilder.Entity("AIpaca.Rumbo.Platform.VehicleCredentialManagement.Domain.Model.Aggregates.Vehicle", b =>
