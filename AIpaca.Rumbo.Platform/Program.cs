@@ -5,7 +5,6 @@ using AIpaca.Rumbo.Platform.Profiles.Application.Internal.CommandServices;
 using AIpaca.Rumbo.Platform.Profiles.Application.Internal.QueryServices;
 using AIpaca.Rumbo.Platform.Profiles.Application.QueryServices;
 using AIpaca.Rumbo.Platform.Profiles.Domain.Repositories;
-using AIpaca.Rumbo.Platform.Profiles.Infrastructure.Persistence.EntityFrameworkCore.Configuration;
 using AIpaca.Rumbo.Platform.Profiles.Infrastructure.Persistence.EntityFrameworkCore.Repositories;
 using AIpaca.Rumbo.Platform.Resources.Errors;
 using AIpaca.Rumbo.Platform.Resources.Shared;
@@ -67,7 +66,7 @@ builder.Services.AddCors(options =>
             .AllowAnyHeader());
 });
 
-builder.Services.AddDbContext<AppDbContext, ProfilesDbContext>((serviceProvider, options) =>
+builder.Services.AddDbContext<AppDbContext>((serviceProvider, options) =>
 {
     var connectionStringTemplate = builder.Configuration.GetConnectionString("DefaultConnection");
     if (string.IsNullOrWhiteSpace(connectionStringTemplate))

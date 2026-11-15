@@ -1,4 +1,6 @@
+using AIpaca.Rumbo.Platform.Profiles.Infrastructure.Persistence.EntityFrameworkCore.Configuration.Extensions;
 using AIpaca.Rumbo.Platform.Shared.Infrastructure.Persistence.EntityFrameworkCore.Configuration.Extensions;
+using AIpaca.Rumbo.Platform.Shared.Infrastructure.Persistence.EntityFrameworkCore.Configuration.ValueConverters;
 using AIpaca.Rumbo.Platform.Shared.Infrastructure.Persistence.EntityFrameworkCore.Interceptors;
 using AIpaca.Rumbo.Platform.VehicleCredentialManagement.Infrastructure.Persistence.EntityFrameworkCore.Configuration.Extensions;
 using AIpaca.Rumbo.Platform.SubscriptionBilling.Infrastructure.Persistence.EntityFrameworkCore.Configuration.Extensions;
@@ -24,6 +26,19 @@ public class AppDbContext(DbContextOptions options) : DbContext(options)
     }
 
     /// <summary>
+    ///     Configure the conventions applied to the database model
+    /// </summary>
+    /// <param name="configurationBuilder">
+    ///     The model configuration builder for the database context
+    /// </param>
+    protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
+    {
+        // Persist every DateOnly property as a DATE column readable by the MySQL provider
+        configurationBuilder.Properties<DateOnly>().HaveConversion<DateOnlyConverter>().HaveColumnType("date");
+        base.ConfigureConventions(configurationBuilder);
+    }
+
+    /// <summary>
     ///     On creating the database model
     /// </summary>
     /// <remarks>
@@ -42,7 +57,7 @@ public class AppDbContext(DbContextOptions options) : DbContext(options)
         builder.ApplyVehicleCredentialManagementConfiguration();
 
         // Profiles & Relationship Management Context
-        // builder.ApplyProfilesRelationshipManagementConfiguration();
+        builder.ApplyProfilesRelationshipManagementConfiguration();
 
         // Route & Schedule Management Context
         builder.ApplyRouteScheduleManagementConfiguration();
