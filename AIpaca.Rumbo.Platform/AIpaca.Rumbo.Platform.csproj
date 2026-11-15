@@ -36,6 +36,7 @@
     </ItemGroup>
 
     <ItemGroup>
+      <Folder Include="AlertingIncidentManagement\Interfaces\Rest\Transform\" />
       <Folder Include="Shared\Application\Model\" />
       <Folder Include="Shared\Domain\Model\Aggregates\Internal\" />
     </ItemGroup>
